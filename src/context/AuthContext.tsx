@@ -214,6 +214,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     toast.success("Logged out successfully");
   };
 
+  // Helper methods
+  const isAdmin = (): boolean => {
+    return user?.role === "admin";
+  };
+
+  const isAffiliate = (): boolean => {
+    return user?.role === "affiliate";
+  };
+
+  const isUser = (): boolean => {
+    return user?.role === "user";
+  };
+
+  const hasRole = (role: string | string[]): boolean => {
+    if (!user) return false;
+    if (Array.isArray(role)) {
+      return role.includes(user.role);
+    }
+    return user.role === role;
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -228,6 +249,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     forgotPassword,
     resetPassword,
     updateProfile,
+    isAdmin,
+    isAffiliate,
+    isUser,
+    hasRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

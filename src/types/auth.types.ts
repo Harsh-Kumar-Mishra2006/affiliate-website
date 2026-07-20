@@ -73,4 +73,9 @@ export interface AuthContextType {
   forgotPassword: (data: ForgotPasswordData) => Promise<void>;
   resetPassword: (data: ResetPasswordData) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  // Add these helper methods
+  isAdmin: () => boolean;
+  isAffiliate: () => boolean;
+  isUser: () => boolean;
+  hasRole: (role: string | string[]) => boolean;
 }
