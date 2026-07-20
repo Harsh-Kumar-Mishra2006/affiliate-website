@@ -19,7 +19,10 @@ import Signup from "./pages/Signup";
 import AdminSignup from "./pages/AdminSignup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+// Add import
+import Products from "./pages/Products";
 
+// Add route in AppRoutes component
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -71,6 +74,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/admin-signup" element={<AdminSignup />} />
+      <Route path="/products" element={<Products />} />
 
       {/* Protected Routes */}
       <Route
