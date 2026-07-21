@@ -1,17 +1,16 @@
 import React, { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import purchaseService from "../../services/purchase.service";
+import purchaseService from "../../services/purchaseService";
 import Button from "../../components/common/Button";
 import toast from "react-hot-toast";
 import {
   ArrowLeftIcon,
   CheckCircleIcon,
-  XCircleIcon,
   DocumentArrowUpIcon,
   BanknotesIcon,
-  CreditCardIcon,
   QrCodeIcon,
   ClipboardIcon,
+  ShoppingBagIcon,
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
@@ -22,7 +21,6 @@ const PaymentPage: React.FC = () => {
   const {
     orderId,
     product,
-    purchase,
     paymentInstructions,
     totalAmount,
     commissionAmount,

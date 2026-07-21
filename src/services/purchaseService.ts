@@ -1,10 +1,10 @@
-import api from './api.service';
+import api from './apiService';
 import {
-  Purchase,
-  InitiatePurchaseData,
-  InitiatePurchaseResponse,
-  UploadPaymentData,
-  PurchaseResponse
+  type Purchase,
+  type InitiatePurchaseData,
+  type InitiatePurchaseResponse,
+  type UploadPaymentData,
+  type PurchaseResponse
 } from '../types/purchase.types';
 
 class PurchaseService {

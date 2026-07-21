@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import purchaseService from "../../services/purchase.service";
+import purchaseService from "../../services/purchaseService";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 import toast from "react-hot-toast";

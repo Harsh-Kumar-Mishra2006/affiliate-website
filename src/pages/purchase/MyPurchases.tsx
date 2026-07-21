@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import purchaseService from "../../services/purchase.service";
-import { Purchase } from "../../types/purchase.types";
+import purchaseService from "../../services/purchaseService";
+import { type Purchase } from "../../types/purchase.types";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import Button from "../../components/common/Button";
 import {
