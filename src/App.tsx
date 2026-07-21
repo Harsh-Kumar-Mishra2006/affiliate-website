@@ -24,6 +24,9 @@ import Products from "./pages/Products";
 import AdminRoutes from "./routes/AdminRoutes";
 import AddProduct from "./pages/affiliate/AddProduct";
 import AffiliateProducts from "./pages/affiliate/AffiliateProducts";
+import PurchaseDetails from "./pages/purchase/PurchaseDetails";
+import PaymentPage from "./pages/purchase/PaymentPage";
+import MyPurchases from "./pages/purchase/MyPurchases";
 
 // In the Routes section
 // Add route in AppRoutes component
@@ -140,6 +143,30 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <AddProduct />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchase/details"
+        element={
+          <ProtectedRoute>
+            <PurchaseDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payment/:orderId"
+        element={
+          <ProtectedRoute>
+            <PaymentPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-purchases"
+        element={
+          <ProtectedRoute>
+            <MyPurchases />
           </ProtectedRoute>
         }
       />

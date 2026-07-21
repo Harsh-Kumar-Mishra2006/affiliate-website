@@ -453,16 +453,15 @@ const Products: React.FC = () => {
                   )}
 
                   {/* Affiliate Button */}
-                  {isAuthenticated && product.affiliateUrl && (
-                    <a
-                      href={product.affiliateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {isAuthenticated && (
+                    <Link
+                      to="/purchase/details"
+                      state={{ product: product }}
                       className="mt-3 w-full inline-flex justify-center items-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
                     >
                       <ShoppingBagIcon className="h-4 w-4 mr-2" />
                       Buy Now
-                    </a>
+                    </Link>
                   )}
                 </div>
               </div>
