@@ -140,7 +140,7 @@ const PaymentPage: React.FC = () => {
                   </h3>
                   <div className="inline-block bg-white p-4 rounded-lg shadow-sm">
                     <img
-                      src="/path-to-your-qr-code.png" // Replace with actual QR code path
+                      src="/payment-qr-code (2).jpg" // Replace with actual QR code path
                       alt="Payment QR Code"
                       className="h-48 w-48"
                     />
