@@ -229,7 +229,9 @@ const Dashboard: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-500">Role</p>
                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                  {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
+                  {user?.role
+                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                    : "User"}
                 </span>
               </div>
               {user?.role === "affiliate" && (
