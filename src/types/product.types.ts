@@ -1,15 +1,3 @@
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  parentId?: number;
-  isActive: boolean;
-  order: number;
-  subcategories?: Category[];
-}
-
 export interface Product {
   id: number;
   name: string;
@@ -35,15 +23,42 @@ export interface Product {
   isActive: boolean;
   isFeatured: boolean;
   addedBy: number;
+  purchaseCount?: number;
+  totalRevenue?: number;
   createdAt: string;
   updatedAt: string;
-  Category?: Category;
+  Category?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
   addedByUser?: {
     id: number;
     name: string;
     email: string;
     role: string;
   };
+}
+
+export interface AddProductData {
+  name: string;
+  productId: string;
+  price: number;
+  company: string;
+  category: string;
+  description?: string;
+  shortDescription?: string;
+  discountedPrice?: number;
+  brand?: string;
+  sku?: string;
+  stock?: number;
+  affiliateUrl?: string;
+  images?: string[];
+  mainImage?: string;
+  tags?: string[];
+  specifications?: Record<string, any>;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export interface ProductResponse {

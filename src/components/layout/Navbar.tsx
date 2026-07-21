@@ -11,11 +11,12 @@ import {
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../common/Button";
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, isAdmin } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin, isAffiliate } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -60,6 +61,24 @@ const Navbar: React.FC = () => {
       show: isAuthenticated,
     },
     { name: "Admin", path: "/admin", icon: ShieldCheckIcon, show: isAdmin() },
+    {
+      name: "Admin Panel",
+      path: "/admin/affiliates",
+      icon: ShieldCheckIcon,
+      show: isAdmin(),
+    },
+    {
+      name: "My Products",
+      path: "/affiliate/products",
+      icon: ShoppingBagIcon,
+      show: isAffiliate() || isAdmin(),
+    },
+    {
+      name: "Add Product",
+      path: "/affiliate/products/add",
+      icon: PlusIcon,
+      show: isAffiliate() || isAdmin(),
+    },
   ];
 
   return (

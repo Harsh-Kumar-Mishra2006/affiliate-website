@@ -21,7 +21,11 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 // Add import
 import Products from "./pages/Products";
+import AdminRoutes from "./routes/AdminRoutes";
+import AddProduct from "./pages/affiliate/AddProduct";
+import AffiliateProducts from "./pages/affiliate/AffiliateProducts";
 
+// In the Routes section
 // Add route in AppRoutes component
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -75,6 +79,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/admin-signup" element={<AdminSignup />} />
       <Route path="/products" element={<Products />} />
+      <Route path="/admin/*" element={<AdminRoutes />} />
 
       {/* Protected Routes */}
       <Route
@@ -111,6 +116,31 @@ const AppRoutes: React.FC = () => {
           <RoleRoute roles={["affiliate", "admin"]}>
             <div>Affiliate Panel (Coming Soon)</div>
           </RoleRoute>
+        }
+      />
+
+      <Route
+        path="/affiliate/products"
+        element={
+          <ProtectedRoute>
+            <AffiliateProducts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/affiliate/products/add"
+        element={
+          <ProtectedRoute>
+            <AddProduct />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/affiliate/products/edit/:id"
+        element={
+          <ProtectedRoute>
+            <AddProduct />
+          </ProtectedRoute>
         }
       />
     </Routes>
