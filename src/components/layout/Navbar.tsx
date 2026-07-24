@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   PlusIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import Button from "../common/Button";
 
@@ -35,7 +36,7 @@ const Navbar: React.FC = () => {
     };
     return (
       <span
-        className={`px-2 py-0.5 text-xs font-medium rounded-full ${roleColors[user.role]}`}
+        className={`px-2 py-0.5 text-xs font-medium rounded-full ${roleColors[user.role as keyof typeof roleColors]}`}
       >
         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
       </span>
@@ -47,6 +48,7 @@ const Navbar: React.FC = () => {
     { name: "Products", path: "/products", icon: ShoppingBagIcon },
   ];
 
+  // ✅ Updated auth links with correct admin paths
   const authLinks = [
     {
       name: "Dashboard",
@@ -60,24 +62,31 @@ const Navbar: React.FC = () => {
       icon: UserIcon,
       show: isAuthenticated,
     },
-    { name: "Admin", path: "/admin", icon: ShieldCheckIcon, show: isAdmin() },
+    // ✅ Admin links - Product Management
     {
       name: "Admin Panel",
-      path: "/admin/affiliates",
+      path: "/admin/products",
       icon: ShieldCheckIcon,
       show: isAdmin(),
     },
     {
-      name: "My Products",
-      path: "/affiliate/products",
-      icon: ShoppingBagIcon,
-      show: isAffiliate() || isAdmin(),
+      name: "All Products",
+      path: "/admin/products",
+      icon: Squares2X2Icon,
+      show: isAdmin(),
     },
     {
       name: "Add Product",
-      path: "/affiliate/products/add",
+      path: "/admin/products/add",
       icon: PlusIcon,
-      show: isAffiliate() || isAdmin(),
+      show: isAdmin(),
+    },
+    // ✅ Affiliate links (keep for later use)
+    {
+      name: "My Products",
+      path: "/affiliate/products",
+      icon: ShoppingBagIcon,
+      show: isAffiliate() && !isAdmin(), // Show only if affiliate (not admin)
     },
   ];
 
