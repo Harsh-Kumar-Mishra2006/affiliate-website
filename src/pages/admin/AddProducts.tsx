@@ -13,7 +13,7 @@ import {
 
 const AddProduct: React.FC = () => {
   const navigate = useNavigate();
-  const { isAffiliate } = useAuth();
+  const { isAdmin } = useAuth(); // ✅ Changed from isAffiliate to isAdmin
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -40,15 +40,24 @@ const AddProduct: React.FC = () => {
   const [specKey, setSpecKey] = useState("");
   const [specValue, setSpecValue] = useState("");
 
-  // Check if user is affiliate
-  if (!isAffiliate()) {
+  // ✅ Check if user is admin
+  if (!isAdmin()) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
+          <div className="bg-red-50 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <XMarkIcon className="h-10 w-10 text-red-600" />
+          </div>
           <h2 className="text-2xl font-bold text-red-600">Access Denied</h2>
           <p className="text-gray-600 mt-2">
-            Only affiliates can add products.
+            Only administrators can add products.
           </p>
+          <button
+            onClick={() => navigate("/admin/dashboard")}
+            className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
+          >
+            Return to Dashboard
+          </button>
         </div>
       </div>
     );
@@ -153,7 +162,7 @@ const AddProduct: React.FC = () => {
 
       const response = await productService.createProduct(productData);
       toast.success(response.message || "Product added successfully!");
-      navigate("/affiliate/products");
+      navigate("/admin/products");
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to add product");
     } finally {
@@ -168,7 +177,7 @@ const AddProduct: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <button
-              onClick={() => navigate("/affiliate/products")}
+              onClick={() => navigate("/admin/products")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
             >
               <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -178,12 +187,15 @@ const AddProduct: React.FC = () => {
               Add New Product
             </h1>
             <p className="text-gray-600 mt-1">
-              List your product for affiliates to promote
+              Add a new product to your affiliate store
             </p>
+          </div>
+          <div className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg text-sm font-medium">
+            Admin Panel
           </div>
         </div>
 
-        {/* Form */}
+        {/* Rest of the form remains the same... */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-sm p-6 space-y-6"
@@ -499,7 +511,7 @@ const AddProduct: React.FC = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/affiliate/products")}
+              onClick={() => navigate("/admin/products")}
             >
               Cancel
             </Button>
