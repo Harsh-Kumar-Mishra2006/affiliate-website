@@ -19,17 +19,20 @@ import Signup from "./pages/Signup";
 import AdminSignup from "./pages/AdminSignup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-// Add import
 import Products from "./pages/Products";
-import AdminRoutes from "./routes/AdminRoutes";
-import AddProduct from "./pages/affiliate/AddProduct";
+
+// ✅ Admin Pages (Correct imports)
+import AdminProducts from "./pages/admin/AdminProducts";
+import AddProduct from "./pages/admin/AddProducts";
+
+// Affiliate Pages (Keep for later use)
 import AffiliateProducts from "./pages/affiliate/AffiliateProducts";
+
+// Purchase Pages
 import PurchaseDetails from "./pages/purchase/PurchaseDetails";
 import PaymentPage from "./pages/purchase/PaymentPage";
 import MyPurchases from "./pages/purchase/MyPurchases";
 
-// In the Routes section
-// Add route in AppRoutes component
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -76,15 +79,14 @@ const RoleRoute: React.FC<{ children: React.ReactNode; roles: string[] }> = ({
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* ============ PUBLIC ROUTES ============ */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/admin-signup" element={<AdminSignup />} />
       <Route path="/products" element={<Products />} />
-      <Route path="/admin/*" element={<AdminRoutes />} />
 
-      {/* Protected Routes */}
+      {/* ============ PROTECTED ROUTES (Any logged-in user) ============ */}
       <Route
         path="/dashboard"
         element={
@@ -102,50 +104,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Admin Routes */}
-      <Route
-        path="/admin/*"
-        element={
-          <RoleRoute roles={["admin"]}>
-            <div>Admin Panel (Coming Soon)</div>
-          </RoleRoute>
-        }
-      />
-
-      {/* Affiliate Routes */}
-      <Route
-        path="/affiliate/*"
-        element={
-          <RoleRoute roles={["affiliate", "admin"]}>
-            <div>Affiliate Panel (Coming Soon)</div>
-          </RoleRoute>
-        }
-      />
-
-      <Route
-        path="/affiliate/products"
-        element={
-          <ProtectedRoute>
-            <AffiliateProducts />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/affiliate/products/add"
-        element={
-          <ProtectedRoute>
-            <AddProduct />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/affiliate/products/edit/:id"
-        element={
-          <ProtectedRoute>
-            <AddProduct />
-          </ProtectedRoute>
-        }
-      />
+      {/* ============ PURCHASE ROUTES (Logged-in users) ============ */}
       <Route
         path="/purchase/details"
         element={
@@ -170,7 +129,92 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
+
+      {/* ============ ADMIN ROUTES (Admin only) ============ */}
+      <Route
+        path="/admin"
+        element={
+          <RoleRoute roles={["admin"]}>
+            <Navigate to="/admin/products" replace />
+          </RoleRoute>
+        }
+      />
+
+      {/* ✅ Admin Products Management */}
+      <Route
+        path="/admin/products"
+        element={
+          <RoleRoute roles={["admin"]}>
+            <AdminProducts />
+          </RoleRoute>
+        }
+      />
+      <Route
+        path="/admin/products/add"
+        element={
+          <RoleRoute roles={["admin"]}>
+            <AddProduct />
+          </RoleRoute>
+        }
+      />
+      <Route
+        path="/admin/products/edit/:id"
+        element={
+          <RoleRoute roles={["admin"]}>
+            <AddProduct />
+          </RoleRoute>
+        }
+      />
+
+      {/* ✅ Admin Dashboard (Placeholder - can add more) */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <RoleRoute roles={["admin"]}>
+            <Dashboard />
+          </RoleRoute>
+        }
+      />
+
+      {/* ============ AFFILIATE ROUTES (For later use) ============ */}
+      <Route
+        path="/affiliate"
+        element={
+          <RoleRoute roles={["affiliate", "admin"]}>
+            <Navigate to="/affiliate/products" replace />
+          </RoleRoute>
+        }
+      />
+      <Route
+        path="/affiliate/products"
+        element={
+          <RoleRoute roles={["affiliate", "admin"]}>
+            <AffiliateProducts />
+          </RoleRoute>
+        }
+      />
+
+      {/* ============ 404 NOT FOUND ============ */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
+  );
+};
+
+// Simple 404 Component
+const NotFound: React.FC = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+        <p className="text-xl text-gray-600 mb-8">Page not found</p>
+        <a
+          href="/"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
   );
 };
 

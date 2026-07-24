@@ -4,7 +4,6 @@ import { type Product, type ProductResponse, type ProductFilters, type AddProduc
 class ProductService {
   // ============ PUBLIC ROUTES (Anyone can view) ============
   
-  // Get all products (public)
   async getProducts(filters: ProductFilters = {}): Promise<ProductResponse> {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -15,27 +14,23 @@ class ProductService {
     return await api.get<ProductResponse>(`/products?${params.toString()}`);
   }
 
-  // Get single product (public)
   async getProduct(id: string | number): Promise<{ success: boolean; data: Product }> {
     return await api.get(`/products/${id}`);
   }
 
-  // Get featured products (public)
   async getFeaturedProducts(limit: number = 10): Promise<{ success: boolean; data: Product[] }> {
     return await api.get(`/products/featured?limit=${limit}`);
   }
 
-  // Get products by category (public)
   async getProductsByCategory(categorySlug: string, page: number = 1, limit: number = 20): Promise<ProductResponse> {
     return await api.get(`/products/category/${categorySlug}?page=${page}&limit=${limit}`);
   }
 
-  // Search products (public)
   async searchProducts(query: string, page: number = 1, limit: number = 20): Promise<ProductResponse> {
     return await api.get(`/products/search?q=${query}&page=${page}&limit=${limit}`);
   }
 
-  // ============ ADMIN ONLY ROUTES (Product Management) ============
+  // ============ ADMIN ONLY ROUTES ============
   
   // ✅ Create product (Admin only)
   async createProduct(data: AddProductData): Promise<{ success: boolean; data: Product; message: string }> {
