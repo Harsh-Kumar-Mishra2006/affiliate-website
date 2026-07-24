@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useIsAdmin } from "../../hooks/useAuth"; // ✅ Use specific hooks
 import productService from "../../services/productService";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
@@ -9,11 +9,12 @@ import {
   ArrowLeftIcon,
   PlusIcon,
   XMarkIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 const AddProduct: React.FC = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth(); // ✅ Changed from isAffiliate to isAdmin
+  const isAdmin = useIsAdmin(); // ✅ Use the dedicated hook
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -41,7 +42,7 @@ const AddProduct: React.FC = () => {
   const [specValue, setSpecValue] = useState("");
 
   // ✅ Check if user is admin
-  if (!isAdmin()) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -183,9 +184,15 @@ const AddProduct: React.FC = () => {
               <ArrowLeftIcon className="h-4 w-4 mr-1" />
               Back to Products
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Add New Product
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Add New Product
+              </h1>
+              <span className="bg-emerald-100 text-emerald-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                <ShieldCheckIcon className="h-3 w-3" />
+                Admin
+              </span>
+            </div>
             <p className="text-gray-600 mt-1">
               Add a new product to your affiliate store
             </p>
@@ -195,7 +202,7 @@ const AddProduct: React.FC = () => {
           </div>
         </div>
 
-        {/* Rest of the form remains the same... */}
+        {/* Form - Keep the same as before */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-sm p-6 space-y-6"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useIsAdmin } from "../../hooks/useAuth"; // ✅ Use specific hooks
 import productService from "../../services/productService";
 import { type Product } from "../../types/product.types";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const AdminProducts: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const isAdmin = useIsAdmin(); // ✅ Use the dedicated hook
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -30,7 +30,7 @@ const AdminProducts: React.FC = () => {
   const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin()) {
+    if (!isAdmin) {
       toast.error("Access denied. Admin only.");
       return;
     }
@@ -109,6 +109,29 @@ const AdminProducts: React.FC = () => {
       </span>
     );
   };
+
+  // ✅ Access denied for non-admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <XCircleIcon className="h-10 w-10 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-red-600">Access Denied</h2>
+          <p className="text-gray-600 mt-2">
+            Only administrators can manage products.
+          </p>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
