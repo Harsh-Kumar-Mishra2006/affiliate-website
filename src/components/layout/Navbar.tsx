@@ -12,12 +12,14 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   PlusIcon,
+  ShoppingCartIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import Button from "../common/Button";
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, isAdmin, isAffiliate } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin, isAffiliate, isUser } =
+    useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -81,11 +83,17 @@ const Navbar: React.FC = () => {
       icon: PlusIcon,
       show: isAdmin(),
     },
+    {
+      name: "View Purcahses",
+      path: "/my-purchases",
+      icon: PlusIcon,
+      show: isUser(),
+    },
     // ✅ Affiliate links (keep for later use)
     {
       name: "My Products",
       path: "/affiliate/products",
-      icon: ShoppingBagIcon,
+      icon: ShoppingCartIcon,
       show: isAffiliate() && !isAdmin(), // Show only if affiliate (not admin)
     },
   ];
