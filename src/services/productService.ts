@@ -80,6 +80,47 @@ class ProductService {
   async bulkUploadProducts(products: AddProductData[]): Promise<{ success: boolean; data: any }> {
     return await api.post('/products/bulk', { products });
   }
+
+  // In productService.ts, add this method after your existing methods:
+
+// ============ AFFILIATE ROUTES ============
+
+// ✅ Get affiliate products (Affiliate users only)
+async getAffiliateProducts(params?: { page?: number; limit?: number }): Promise<{
+  success: boolean;
+  data: {
+    products: Product[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
+}> {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+  return await api.get(`/affiliate/products?${queryParams.toString()}`);
+}
+
+// ✅ Get affiliate product stats (Affiliate users only)
+async getAffiliateStats(): Promise<{
+  success: boolean;
+  data: {
+    total: number;
+    active: number;
+    inactive: number;
+    totalRevenue: number;
+  };
+}> {
+  return await api.get('/affiliate/products/stats');
+}
 }
 
 export default new ProductService();
