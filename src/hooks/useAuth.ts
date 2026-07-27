@@ -1,15 +1,13 @@
-import { useContext } from 'react';
-import AuthContext from '../context/AuthContext';
+// hooks/useAuth.ts
+// ✅ This file should only re-export the hook from AuthContext
+// to avoid duplicate definitions
+
+import { useAuth as useAuthFromContext } from '../context/AuthContext';
 import { type AuthContextType } from '../types/auth.types';
 
+// Re-export the hook from AuthContext
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
+  return useAuthFromContext();
 };
 
 // Additional utility hooks
@@ -44,4 +42,5 @@ export const useIsUser = () => {
   return useHasRole('user');
 };
 
+// Default export for convenience
 export default useAuth;

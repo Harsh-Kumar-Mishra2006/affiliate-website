@@ -1,4 +1,5 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
+// services/apiService.ts
+import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://affiliate-website-backend.onrender.com/api';
 
@@ -11,30 +12,58 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 30000,
     });
 
     // Request interceptor to add token
     this.api.interceptors.request.use(
-      (config) => {
+      (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log(`🔑 Request: ${config.method?.toUpperCase()} ${config.url} - Token added`);
+        } else {
+          console.log(`ℹ️ Request: ${config.method?.toUpperCase()} ${config.url} - No token`);
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        console.error('❌ Request interceptor error:', error);
+        return Promise.reject(error);
+      }
     );
 
     // Response interceptor for error handling
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log(`✅ Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+        return response;
+      },
       (error) => {
+        // Handle 401 errors
         if (error.response?.status === 401) {
-          // Handle unauthorized - clear token
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          console.log('🔒 401 Unauthorized - Token invalid or expired');
+          
+          // Don't redirect if we're on login page or auth endpoints
+          const currentPath = window.location.pathname;
+          const isAuthPage = currentPath.includes('/login') || 
+                           currentPath.includes('/signup') || 
+                           currentPath.includes('/forgot-password') ||
+                           currentPath.includes('/reset-password');
+          
+          if (!isAuthPage && !error.config?.url?.includes('/auth/verify-token')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            console.log('🔒 Redirecting to login');
+            window.location.href = '/login';
+          }
         }
+        
+        // Handle network errors
+        if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+          console.error('❌ Network error occurred');
+        }
+        
         return Promise.reject(error);
       }
     );

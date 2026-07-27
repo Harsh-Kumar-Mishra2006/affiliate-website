@@ -1,3 +1,4 @@
+// context/AuthContext.tsx
 import React, {
   createContext,
   useState,
@@ -33,26 +34,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = authService.getToken();
-      const storedUser = authService.getUser();
+      try {
+        const storedToken = authService.getToken();
+        const storedUser = authService.getUser();
 
-      if (storedToken && storedUser) {
-        try {
-          // Verify token
-          const response = await authService.verifyToken();
-          if (response.success) {
-            setToken(storedToken);
-            setUser(storedUser);
-            setNeedsPasswordChange(response.data.needsPasswordChange || false);
-          } else {
-            authService.logout();
+        console.log("🔍 Initializing auth...", {
+          hasToken: !!storedToken,
+          hasUser: !!storedUser,
+        });
+
+        if (storedToken && storedUser) {
+          try {
+            // Verify token with server
+            const response = await authService.verifyToken();
+            console.log("✅ Token verification response:", response);
+
+            if (response.success) {
+              setToken(storedToken);
+              setUser(storedUser);
+              setNeedsPasswordChange(
+                response.data?.needsPasswordChange || false,
+              );
+              console.log("✅ User authenticated:", storedUser.name);
+            } else {
+              console.log("⚠️ Token verification failed, logging out");
+              authService.logout();
+            }
+          } catch (error: any) {
+            console.error("❌ Token verification error:", error);
+            // Only logout if it's a 401 error
+            if (error.response?.status === 401) {
+              authService.logout();
+            }
           }
-        } catch (error) {
-          console.error("Auth initialization error:", error);
-          authService.logout();
+        } else {
+          console.log("ℹ️ No stored credentials found");
         }
+      } catch (error) {
+        console.error("❌ Auth initialization error:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     initializeAuth();
@@ -72,9 +94,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Login failed");
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "Login failed. Please try again.",
-      );
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Login failed. Please try again.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -95,9 +119,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Signup failed");
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "Signup failed. Please try again.",
-      );
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Signup failed. Please try again.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -120,9 +146,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Admin signup failed");
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "Admin signup failed. Please try again.",
-      );
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Admin signup failed. Please try again.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -141,7 +169,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Password change failed");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to change password.");
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to change password.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -161,7 +193,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Forgot password failed");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to send reset link.");
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to send reset link.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -179,7 +215,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Reset password failed");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to reset password.");
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to reset password.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -198,7 +238,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       throw new Error(response.message || "Profile update failed");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to update profile.");
+      const errorMsg =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update profile.";
+      toast.error(errorMsg);
       throw error;
     } finally {
       setIsLoading(false);
@@ -258,6 +302,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// ✅ Fix: Only export useAuth as a hook, not as a default
 export const useAuth = () => {
   const context = React.useContext(AuthContext);
   if (context === undefined) {
@@ -266,4 +311,5 @@ export const useAuth = () => {
   return context;
 };
 
+// Export the context for advanced use cases
 export default AuthContext;
