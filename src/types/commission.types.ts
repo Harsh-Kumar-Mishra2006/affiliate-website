@@ -191,3 +191,33 @@ export interface CommissionFilters {
   endDate?: string;
   search?: string;
 }
+export interface CommissionSummary {
+  totalEarnings: number;
+  totalOrders: number;
+  averageCommissionRate: string;
+  approved: number;
+  approvedCount: number;
+  pending: number;
+  pendingCount: number;
+  paid: number;
+  paidCount: number;
+  rejected: number;
+  rejectedCount: number;
+}
+
+export interface TopProduct {
+  productId: number;
+  totalAmount: number;
+  count: number;
+  Product: {
+    id: number;
+    name: string;
+    mainImage: string;
+    company: string;
+  };
+}
+
+export interface MonthlyTrend {
+  month: string;
+  total: number;
+}

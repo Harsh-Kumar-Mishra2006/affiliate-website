@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
   PlusIcon,
   ShoppingCartIcon,
+  CurrencyRupeeIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import Button from "../common/Button";
@@ -94,7 +95,20 @@ const Navbar: React.FC = () => {
       name: "My Products",
       path: "/affiliate/products",
       icon: ShoppingCartIcon,
-      show: isAffiliate() && !isAdmin(), // Show only if affiliate (not admin)
+      show: isAffiliate() && !isAdmin(),
+    },
+    {
+      name: "My Commissions",
+      path: "/affiliate/commission",
+      icon: CurrencyRupeeIcon,
+      show: isAdmin(),
+    },
+
+    {
+      name: "Commission Chart",
+      path: "/admin/commission",
+      icon: CurrencyRupeeIcon,
+      show: isAffiliate(),
     },
   ];
 

@@ -8,7 +8,7 @@ import {
   type AdminCommissionSummaryResponse,
   type AffiliateCommissionSummaryResponse,
   type CommissionStatistics
-} from '../types/commission,types';
+} from '../types/commission.types';
 
 class CommissionService {
   // ============= ADMIN ROUTES =============
