@@ -32,11 +32,12 @@ class AuthService {
 
   async signup(data: SignupCredentials): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/user/signup', data);
+      // Use the unified signup endpoint
+      const response = await api.post<AuthResponse>('/auth/signup', data);
       if (response.success && response.data) {
         this.setToken(response.data.token);
         this.setUser(response.data.user);
-        console.log('✅ Signup successful for:', response.data.user.email);
+        console.log(`✅ ${data.role} signup successful for:`, response.data.user.email);
       }
       return response;
     } catch (error) {
@@ -45,19 +46,9 @@ class AuthService {
     }
   }
 
+  // Keep for backward compatibility
   async adminSignup(data: AdminSignupCredentials): Promise<AuthResponse> {
-    try {
-      const response = await api.post<AuthResponse>('/auth/admin/signup', data);
-      if (response.success && response.data) {
-        this.setToken(response.data.token);
-        this.setUser(response.data.user);
-        console.log('✅ Admin signup successful for:', response.data.user.email);
-      }
-      return response;
-    } catch (error) {
-      console.error('❌ Admin signup error:', error);
-      throw error;
-    }
+    return this.signup({ ...data, role: 'admin' });
   }
 
   async changePassword(data: ChangePasswordData): Promise<AuthResponse> {
@@ -129,7 +120,6 @@ class AuthService {
     } catch (error: any) {
       console.error('❌ Verify token error:', error);
       
-      // If token is invalid, clear it
       if (error.response?.status === 401) {
         this.logout();
         console.log('🔒 Invalid token, cleared auth data');

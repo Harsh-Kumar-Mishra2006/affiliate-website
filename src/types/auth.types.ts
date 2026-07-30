@@ -1,3 +1,4 @@
+// auth.types.ts
 export interface User {
   id: number;
   name: string;
@@ -41,8 +42,13 @@ export interface SignupCredentials {
   username: string;
   phone: string;
   password: string;
+  role: 'admin' | 'affiliate' | 'user';
+  commissionRate?: number;
+  paymentMethod?: string;
+  paymentDetails?: any;
 }
 
+// Keep for backward compatibility
 export interface AdminSignupCredentials extends SignupCredentials {}
 
 export interface ChangePasswordData {
@@ -73,7 +79,6 @@ export interface AuthContextType {
   forgotPassword: (data: ForgotPasswordData) => Promise<void>;
   resetPassword: (data: ResetPasswordData) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
-  // Add these helper methods
   isAdmin: () => boolean;
   isAffiliate: () => boolean;
   isUser: () => boolean;
