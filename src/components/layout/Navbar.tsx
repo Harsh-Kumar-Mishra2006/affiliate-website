@@ -111,7 +111,7 @@ const Navbar: React.FC = () => {
       show: isAffiliate(),
     },
     {
-      name: "Commission Chart",
+      name: "Add Products",
       path: "/affiliate-add-products",
       icon: ShoppingBagIcon,
       show: isAffiliate(),
