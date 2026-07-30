@@ -16,6 +16,7 @@
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
+    "@mui/system": "^9.2.0",
     "@mui/x-date-pickers": "^9.10.1",
     "autoprefixer": "^10.5.4",
     "axios": "^1.18.1",
