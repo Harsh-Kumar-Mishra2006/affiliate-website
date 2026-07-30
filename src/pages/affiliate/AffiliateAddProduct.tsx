@@ -1,7 +1,7 @@
-// pages/admin/AddProduct.tsx
+// pages/affiliate/AddProduct.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useIsAdmin } from "../../hooks/useAuth";
+import { useIsAffiliate } from "../../hooks/useAuth";
 import productService from "../../services/productService";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
@@ -10,13 +10,14 @@ import {
   ArrowLeftIcon,
   PlusIcon,
   XMarkIcon,
-  ShieldCheckIcon,
-  PhotoIcon,
+  UserIcon,
+  CurrencyDollarIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
-const AddProduct: React.FC = () => {
+const AffiliateAddProduct: React.FC = () => {
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const isAffiliate = useIsAffiliate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -29,6 +30,8 @@ const AddProduct: React.FC = () => {
     discountedPrice: "",
     brand: "",
     stock: "",
+    affiliateUrl: "",
+    commissionRate: "",
     mainImage: "",
     images: [] as string[],
     tags: [] as string[],
@@ -42,8 +45,8 @@ const AddProduct: React.FC = () => {
   const [specKey, setSpecKey] = useState("");
   const [specValue, setSpecValue] = useState("");
 
-  // Check if user is admin
-  if (!isAdmin) {
+  // Check if user is affiliate
+  if (!isAffiliate) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -52,10 +55,10 @@ const AddProduct: React.FC = () => {
           </div>
           <h2 className="text-2xl font-bold text-red-600">Access Denied</h2>
           <p className="text-gray-600 mt-2">
-            Only administrators can add products.
+            Only affiliates can add products.
           </p>
           <button
-            onClick={() => navigate("/admin/dashboard")}
+            onClick={() => navigate("/dashboard")}
             className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
           >
             Return to Dashboard
@@ -139,6 +142,21 @@ const AddProduct: React.FC = () => {
     if (!formData.price) newErrors.price = "Price is required";
     if (!formData.company) newErrors.company = "Company name is required";
     if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.affiliateUrl) {
+      newErrors.affiliateUrl = "Affiliate URL is required";
+    } else if (!formData.affiliateUrl.startsWith("http")) {
+      newErrors.affiliateUrl =
+        "Please enter a valid URL starting with http:// or https://";
+    }
+    if (!formData.commissionRate) {
+      newErrors.commissionRate = "Commission rate is required";
+    } else {
+      const rate = parseFloat(formData.commissionRate);
+      if (isNaN(rate) || rate < 10 || rate > 25) {
+        newErrors.commissionRate =
+          "Commission rate must be between 10% and 25%";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -160,12 +178,13 @@ const AddProduct: React.FC = () => {
         images: formData.images,
         tags: formData.tags,
         specifications: formData.specifications,
-        // Admin does not send affiliateUrl or commissionRate
+        commissionRate: parseFloat(formData.commissionRate),
+        // Affiliate URL is included
       };
 
       const response = await productService.createProduct(productData);
       toast.success(response.message || "Product added successfully!");
-      navigate("/admin/products");
+      navigate("/affiliate/products");
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to add product");
     } finally {
@@ -180,7 +199,7 @@ const AddProduct: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <button
-              onClick={() => navigate("/admin/products")}
+              onClick={() => navigate("/affiliate/products")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
             >
               <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -190,17 +209,32 @@ const AddProduct: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900">
                 Add New Product
               </h1>
-              <span className="bg-emerald-100 text-emerald-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                <ShieldCheckIcon className="h-3 w-3" />
-                Admin
+              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                <UserIcon className="h-3 w-3" />
+                Affiliate
               </span>
             </div>
             <p className="text-gray-600 mt-1">
-              Add a new product to your affiliate store
+              Add a new product with your affiliate link
             </p>
           </div>
-          <div className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg text-sm font-medium">
-            Admin Panel
+          <div className="bg-purple-50 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium">
+            Affiliate Panel
+          </div>
+        </div>
+
+        {/* Info Banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+          <InformationCircleIcon className="h-5 w-5 text-blue-500 mt-0.5" />
+          <div>
+            <p className="text-sm text-blue-700 font-medium">
+              Affiliate Product Addition
+            </p>
+            <p className="text-sm text-blue-600">
+              You'll earn commission on this product. The admin will receive the
+              commission you set (10-25%). Make sure to provide a valid
+              affiliate URL.
+            </p>
           </div>
         </div>
 
@@ -292,6 +326,56 @@ const AddProduct: React.FC = () => {
             </div>
           </div>
 
+          {/* Affiliate Specific Fields */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <CurrencyDollarIcon className="h-5 w-5 text-purple-600" />
+              Affiliate Details
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <Input
+                  label="Affiliate URL"
+                  type="text"
+                  name="affiliateUrl"
+                  placeholder="https://example.com/ref/your-affiliate-id"
+                  value={formData.affiliateUrl}
+                  onChange={handleChange}
+                  error={errors.affiliateUrl}
+                  required
+                  helpText="Your unique affiliate link for this product"
+                />
+              </div>
+              <div>
+                <Input
+                  label="Commission Rate (%)"
+                  type="number"
+                  name="commissionRate"
+                  placeholder="10-25%"
+                  value={formData.commissionRate}
+                  onChange={handleChange}
+                  error={errors.commissionRate}
+                  required
+                  helpText="Set between 10% and 25%"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Admin will receive this commission on sales
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+                <UserIcon className="h-5 w-5 text-gray-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Your Email</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {localStorage.getItem("user")
+                      ? JSON.parse(localStorage.getItem("user") || "{}").email
+                      : "Not logged in"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Description */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -308,7 +392,7 @@ const AddProduct: React.FC = () => {
                   placeholder="Brief product description"
                   value={formData.shortDescription}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
@@ -321,7 +405,7 @@ const AddProduct: React.FC = () => {
                   placeholder="Detailed product description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -351,7 +435,7 @@ const AddProduct: React.FC = () => {
                     placeholder="Enter image URL"
                     value={imageInput}
                     onChange={(e) => setImageInput(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <Button type="button" variant="secondary" onClick={addImage}>
                     <PlusIcon className="h-4 w-4" />
@@ -397,7 +481,7 @@ const AddProduct: React.FC = () => {
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addTag())
                 }
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <Button type="button" variant="secondary" onClick={addTag}>
                 <PlusIcon className="h-4 w-4" />
@@ -408,7 +492,7 @@ const AddProduct: React.FC = () => {
                 {formData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
                   >
                     {tag}
                     <button
@@ -435,14 +519,14 @@ const AddProduct: React.FC = () => {
                 placeholder="Key"
                 value={specKey}
                 onChange={(e) => setSpecKey(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <input
                 type="text"
                 placeholder="Value"
                 value={specValue}
                 onChange={(e) => setSpecValue(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <Button
                 type="button"
@@ -500,20 +584,18 @@ const AddProduct: React.FC = () => {
                   placeholder="Enter meta description"
                   value={formData.metaDescription}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
           </div>
-
-          {/* Note: No Affiliate Link or Commission Rate fields for Admin */}
 
           {/* Submit */}
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/admin/products")}
+              onClick={() => navigate("/affiliate/products")}
             >
               Cancel
             </Button>
@@ -527,4 +609,4 @@ const AddProduct: React.FC = () => {
   );
 };
 
-export default AddProduct;
+export default AffiliateAddProduct;

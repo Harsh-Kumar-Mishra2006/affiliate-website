@@ -1,3 +1,4 @@
+// types/product.types.ts
 export interface Product {
   id: number;
   name: string;
@@ -23,6 +24,11 @@ export interface Product {
   isActive: boolean;
   isFeatured: boolean;
   addedBy: number;
+  addedByRole?: 'admin' | 'affiliate';
+  commissionRate?: number;
+  affiliateEmail?: string;
+  adminCommissionShare?: number;
+  totalCommissionEarned?: number;
   purchaseCount?: number;
   totalRevenue?: number;
   createdAt: string;
@@ -59,6 +65,8 @@ export interface AddProductData {
   specifications?: Record<string, any>;
   metaTitle?: string;
   metaDescription?: string;
+  // Affiliate specific fields
+  commissionRate?: number;
 }
 
 export interface ProductResponse {
@@ -84,4 +92,5 @@ export interface ProductFilters {
   search?: string;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+  addedByRole?: 'admin' | 'affiliate';
 }

@@ -1,3 +1,4 @@
+// services/productService.ts
 import api from './apiService';
 import { type Product, type ProductResponse, type ProductFilters, type AddProductData } from '../types/product.types';
 
@@ -30,13 +31,20 @@ class ProductService {
     return await api.get(`/products/search?q=${query}&page=${page}&limit=${limit}`);
   }
 
-  // ============ ADMIN ONLY ROUTES ============
+  // ============ ADMIN & AFFILIATE ROUTES ============
   
-  // ✅ Create product (Admin only)
+  // ✅ Create product (Admin & Affiliate)
   async createProduct(data: AddProductData): Promise<{ success: boolean; data: Product; message: string }> {
     return await api.post('/products', data);
   }
 
+  // ✅ Update product (Admin & Affiliate - with restrictions)
+  async updateProduct(id: string | number, data: Partial<Product>): Promise<{ success: boolean; data: Product }> {
+    return await api.put(`/products/${id}`, data);
+  }
+
+  // ============ ADMIN ONLY ROUTES ============
+  
   // ✅ Get all products including inactive (Admin only)
   async getAdminProducts(params?: { page?: number; limit?: number; showInactive?: boolean }): Promise<{
     success: boolean;
@@ -61,11 +69,6 @@ class ProductService {
     return await api.get(`/admin/products?${queryParams.toString()}`);
   }
 
-  // ✅ Update product (Admin only)
-  async updateProduct(id: string | number, data: Partial<Product>): Promise<{ success: boolean; data: Product }> {
-    return await api.put(`/products/${id}`, data);
-  }
-
   // ✅ Delete product (Admin only)
   async deleteProduct(id: string | number): Promise<{ success: boolean; message: string }> {
     return await api.delete(`/products/${id}`);
@@ -81,46 +84,70 @@ class ProductService {
     return await api.post('/products/bulk', { products });
   }
 
-  // In productService.ts, add this method after your existing methods:
-
-// ============ AFFILIATE ROUTES ============
-
-// ✅ Get affiliate products (Affiliate users only)
-async getAffiliateProducts(params?: { page?: number; limit?: number }): Promise<{
-  success: boolean;
-  data: {
-    products: Product[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
+  // ✅ Get admin products with commission (Admin only)
+  async getAdminCommissionProducts(params?: { page?: number; limit?: number }): Promise<{
+    success: boolean;
+    data: {
+      products: Product[];
+      stats: {
+        totalAffiliateProducts: number;
+        totalAdminCommission: number;
+      };
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
     };
-  };
-}> {
-  const queryParams = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value.toString());
-      }
-    });
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    return await api.get(`/admin/products/commission?${queryParams.toString()}`);
   }
-  return await api.get(`/affiliate/products?${queryParams.toString()}`);
-}
 
-// ✅ Get affiliate product stats (Affiliate users only)
-async getAffiliateStats(): Promise<{
-  success: boolean;
-  data: {
-    total: number;
-    active: number;
-    inactive: number;
-    totalRevenue: number;
-  };
-}> {
-  return await api.get('/affiliate/products/stats');
-}
+  // ============ AFFILIATE ROUTES ============
+
+  // ✅ Get affiliate products (Affiliate users only)
+  async getAffiliateProducts(params?: { page?: number; limit?: number }): Promise<{
+    success: boolean;
+    data: {
+      products: Product[];
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    };
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    return await api.get(`/affiliate/products?${queryParams.toString()}`);
+  }
+
+  // ✅ Get affiliate stats (Affiliate users only)
+  async getAffiliateStats(): Promise<{
+    success: boolean;
+    data: {
+      totalProducts: number;
+      totalCommissionEarned: number;
+    };
+  }> {
+    return await api.get('/affiliate/products/stats');
+  }
 }
 
 export default new ProductService();
