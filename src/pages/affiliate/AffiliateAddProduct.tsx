@@ -179,7 +179,6 @@ const AffiliateAddProduct: React.FC = () => {
         tags: formData.tags,
         specifications: formData.specifications,
         commissionRate: parseFloat(formData.commissionRate),
-        // Affiliate URL is included
       };
 
       const response = await productService.createProduct(productData);
@@ -190,6 +189,20 @@ const AffiliateAddProduct: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Get user email from localStorage
+  const getUserEmail = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.email || "Not logged in";
+      }
+    } catch {
+      return "Not logged in";
+    }
+    return "Not logged in";
   };
 
   return (
@@ -343,7 +356,7 @@ const AffiliateAddProduct: React.FC = () => {
                   onChange={handleChange}
                   error={errors.affiliateUrl}
                   required
-                  helpText="Your unique affiliate link for this product"
+                  helperText="Your unique affiliate link for this product"
                 />
               </div>
               <div>
@@ -356,7 +369,7 @@ const AffiliateAddProduct: React.FC = () => {
                   onChange={handleChange}
                   error={errors.commissionRate}
                   required
-                  helpText="Set between 10% and 25%"
+                  helperText="Set between 10% and 25%"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   Admin will receive this commission on sales
@@ -367,9 +380,7 @@ const AffiliateAddProduct: React.FC = () => {
                 <div>
                   <p className="text-xs text-gray-500">Your Email</p>
                   <p className="text-sm font-medium text-gray-700">
-                    {localStorage.getItem("user")
-                      ? JSON.parse(localStorage.getItem("user") || "{}").email
-                      : "Not logged in"}
+                    {getUserEmail()}
                   </p>
                 </div>
               </div>

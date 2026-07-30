@@ -99,15 +99,21 @@ const Navbar: React.FC = () => {
     },
     {
       name: "My Commissions",
-      path: "/affiliate/commission",
+      path: "/admin/commission",
       icon: CurrencyRupeeIcon,
       show: isAdmin(),
     },
 
     {
       name: "Commission Chart",
-      path: "/admin/commission",
+      path: "/affiliate/commission",
       icon: CurrencyRupeeIcon,
+      show: isAffiliate(),
+    },
+    {
+      name: "Commission Chart",
+      path: "/affiliate-add-products",
+      icon: ShoppingBagIcon,
       show: isAffiliate(),
     },
   ];

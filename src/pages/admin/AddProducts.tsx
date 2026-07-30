@@ -11,7 +11,6 @@ import {
   PlusIcon,
   XMarkIcon,
   ShieldCheckIcon,
-  PhotoIcon,
 } from "@heroicons/react/24/outline";
 
 const AddProduct: React.FC = () => {

@@ -34,6 +34,7 @@ import PaymentPage from "./pages/purchase/PaymentPage";
 import MyPurchases from "./pages/purchase/MyPurchases";
 import AdminCommission from "./pages/admin/AdminCommission";
 import AffiliateCommission from "./pages/affiliate/AffiliateCommission";
+import AffiliateAddProduct from "./pages/affiliate/AffiliateAddProduct";
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -128,6 +129,14 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <MyPurchases />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/affiliate-add-products"
+        element={
+          <ProtectedRoute>
+            <AffiliateAddProduct />
           </ProtectedRoute>
         }
       />
