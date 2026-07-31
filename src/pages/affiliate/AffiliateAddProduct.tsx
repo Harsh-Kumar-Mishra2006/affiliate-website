@@ -1,5 +1,5 @@
 // pages/affiliate/AddProduct.tsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsAffiliate } from "../../hooks/useAuth";
 import productService from "../../services/productService";
@@ -13,11 +13,13 @@ import {
   UserIcon,
   CurrencyDollarIcon,
   InformationCircleIcon,
+  CloudArrowUpIcon,
 } from "@heroicons/react/24/outline";
 
 const AffiliateAddProduct: React.FC = () => {
   const navigate = useNavigate();
   const isAffiliate = useIsAffiliate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,20 +34,18 @@ const AffiliateAddProduct: React.FC = () => {
     stock: "",
     affiliateUrl: "",
     commissionRate: "",
-    mainImage: "",
-    images: [] as string[],
+    images: [] as File[],
+    imagePreviews: [] as string[],
     tags: [] as string[],
     specifications: {} as Record<string, any>,
     metaTitle: "",
     metaDescription: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imageInput, setImageInput] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [specKey, setSpecKey] = useState("");
   const [specValue, setSpecValue] = useState("");
 
-  // Check if user is affiliate
   if (!isAffiliate) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,13 +78,39 @@ const AffiliateAddProduct: React.FC = () => {
     }
   };
 
-  const addImage = () => {
-    if (imageInput && !formData.images.includes(imageInput)) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, imageInput],
-      }));
-      setImageInput("");
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const validFiles = files.filter((file) => {
+      const isValidType = file.type.startsWith("image/");
+      const isValidSize = file.size <= 5 * 1024 * 1024;
+      if (!isValidType) {
+        toast.error(`${file.name} is not a valid image file`);
+      }
+      if (!isValidSize) {
+        toast.error(`${file.name} exceeds 5MB limit`);
+      }
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length === 0) return;
+
+    if (formData.images.length + validFiles.length > 10) {
+      toast.error("Maximum 10 images allowed");
+      return;
+    }
+
+    const previews = validFiles.map((file) => URL.createObjectURL(file));
+
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...validFiles],
+      imagePreviews: [...prev.imagePreviews, ...previews],
+    }));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -92,6 +118,7 @@ const AffiliateAddProduct: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
+      imagePreviews: prev.imagePreviews.filter((_, i) => i !== index),
     }));
   };
 
@@ -167,21 +194,40 @@ const AffiliateAddProduct: React.FC = () => {
     if (!validateForm()) return;
 
     setLoading(true);
+
     try {
-      const productData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        discountedPrice: formData.discountedPrice
-          ? parseFloat(formData.discountedPrice)
-          : undefined,
-        stock: formData.stock ? parseInt(formData.stock) : 0,
-        images: formData.images,
-        tags: formData.tags,
-        specifications: formData.specifications,
-        commissionRate: parseFloat(formData.commissionRate),
+      const formDataToSend = new FormData();
+
+      const textFields = {
+        name: formData.name,
+        productId: formData.productId,
+        price: formData.price,
+        company: formData.company,
+        category: formData.category,
+        description: formData.description,
+        shortDescription: formData.shortDescription,
+        discountedPrice: formData.discountedPrice,
+        brand: formData.brand,
+        stock: formData.stock,
+        affiliateUrl: formData.affiliateUrl,
+        commissionRate: formData.commissionRate,
+        tags: JSON.stringify(formData.tags),
+        specifications: JSON.stringify(formData.specifications),
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
       };
 
-      const response = await productService.createProduct(productData);
+      Object.entries(textFields).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      formData.images.forEach((file) => {
+        formDataToSend.append("images", file);
+      });
+
+      const response = await productService.createProduct(formDataToSend);
       toast.success(response.message || "Product added successfully!");
       navigate("/affiliate/products");
     } catch (error: any) {
@@ -191,7 +237,6 @@ const AffiliateAddProduct: React.FC = () => {
     }
   };
 
-  // Get user email from localStorage
   const getUserEmail = () => {
     try {
       const userStr = localStorage.getItem("user");
@@ -422,56 +467,58 @@ const AffiliateAddProduct: React.FC = () => {
             </div>
           </div>
 
-          {/* Images */}
+          {/* Images - File Upload */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Product Images
             </h2>
             <div className="space-y-4">
-              <Input
-                label="Main Image URL"
-                type="text"
-                name="mainImage"
-                placeholder="Enter main image URL"
-                value={formData.mainImage}
-                onChange={handleChange}
-              />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Additional Images
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Images
                 </label>
-                <div className="flex gap-2">
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    PNG, JPG, GIF up to 5MB (Max 10 images)
+                  </p>
                   <input
-                    type="text"
-                    placeholder="Enter image URL"
-                    value={imageInput}
-                    onChange={(e) => setImageInput(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
                   />
-                  <Button type="button" variant="secondary" onClick={addImage}>
-                    <PlusIcon className="h-4 w-4" />
-                  </Button>
                 </div>
-                {formData.images.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {formData.images.map((url, index) => (
+
+                {formData.imagePreviews.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {formData.imagePreviews.map((preview, index) => (
                       <div key={index} className="relative group">
                         <img
-                          src={url}
+                          src={preview}
                           alt={`Product ${index + 1}`}
-                          className="h-20 w-20 object-cover rounded-lg border border-gray-200"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              "https://via.placeholder.com/80?text=No+Image";
-                          }}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <XMarkIcon className="h-4 w-4" />
                         </button>
+                        {index === 0 && (
+                          <span className="absolute bottom-2 left-2 bg-purple-500 text-white text-xs px-2 py-1 rounded">
+                            Main
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -611,7 +658,7 @@ const AffiliateAddProduct: React.FC = () => {
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={loading}>
-              Add Product
+              {loading ? "Uploading..." : "Add Product"}
             </Button>
           </div>
         </form>
