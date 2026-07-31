@@ -11,7 +11,6 @@ import {
   PlusIcon,
   XMarkIcon,
   ShieldCheckIcon,
-  PhotoIcon,
   CloudArrowUpIcon,
 } from "@heroicons/react/24/outline";
 
@@ -20,7 +19,7 @@ const AddProduct: React.FC = () => {
   const isAdmin = useIsAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [_uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
     productId: "",

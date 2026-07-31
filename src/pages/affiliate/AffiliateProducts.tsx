@@ -1,3 +1,4 @@
+// pages/affiliate/AffiliateProducts.tsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -10,16 +11,24 @@ import {
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
-  EyeIcon,
   CheckCircleIcon,
   XCircleIcon,
   ShoppingBagIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  TagIcon,
+  LinkIcon,
+  CalendarIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 
 const AffiliateProducts: React.FC = () => {
   const { isAffiliate } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedProductId, setExpandedProductId] = useState<number | null>(
+    null,
+  );
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -60,7 +69,10 @@ const AffiliateProducts: React.FC = () => {
 
   const handleToggleStatus = async (id: number, currentStatus: boolean) => {
     try {
-      await productService.updateProduct(id, { isActive: !currentStatus });
+      const formData = new FormData();
+      formData.append("isActive", String(!currentStatus));
+
+      await productService.updateProduct(id, formData);
       toast.success(`Product ${!currentStatus ? "activated" : "deactivated"}`);
       fetchProducts();
       fetchStats();
@@ -82,6 +94,10 @@ const AffiliateProducts: React.FC = () => {
     }
   };
 
+  const toggleExpand = (id: number) => {
+    setExpandedProductId(expandedProductId === id ? null : id);
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -89,6 +105,46 @@ const AffiliateProducts: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // ✅ Helper function to safely parse tags
+  const getTagsArray = (tags: any): string[] => {
+    if (!tags) return [];
+    if (Array.isArray(tags)) return tags;
+    if (typeof tags === "string") {
+      try {
+        const parsed = JSON.parse(tags);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // ✅ Helper function to safely parse specifications
+  const getSpecificationsObject = (specs: any): Record<string, any> => {
+    if (!specs) return {};
+    if (typeof specs === "object" && !Array.isArray(specs)) return specs;
+    if (typeof specs === "string") {
+      try {
+        const parsed = JSON.parse(specs);
+        return typeof parsed === "object" && !Array.isArray(parsed)
+          ? parsed
+          : {};
+      } catch {
+        return {};
+      }
+    }
+    return {};
   };
 
   const getStatusBadge = (isActive: boolean) => {
@@ -179,115 +235,332 @@ const AffiliateProducts: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                          {product.mainImage ? (
-                            <img
-                              src={product.mainImage}
-                              alt={product.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center">
-                              <ShoppingBagIcon className="h-6 w-6 text-gray-400" />
+                {products.map((product) => {
+                  // ✅ Parse tags and specifications safely
+                  const tags = getTagsArray(product.tags);
+                  const specifications = getSpecificationsObject(
+                    product.specifications,
+                  );
+
+                  return (
+                    <React.Fragment key={product.id}>
+                      <tr className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                              {product.mainImage ? (
+                                <img
+                                  src={product.mainImage}
+                                  alt={product.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center">
+                                  <ShoppingBagIcon className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {product.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {product.company} • {product.Category?.name}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {formatPrice(product.price)}
+                          </div>
+                          {product.discountedPrice && (
+                            <div className="text-xs text-gray-400 line-through">
+                              {formatPrice(product.discountedPrice)}
                             </div>
                           )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {product.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`text-sm font-medium ${
+                              product.stock > 10
+                                ? "text-green-600"
+                                : product.stock > 0
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                            }`}
+                          >
+                            {product.stock > 0 ? product.stock : "Out of Stock"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(product.isActive)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {product.purchaseCount || 0} sold
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {product.company} • {product.Category?.name}
+                          <div className="text-xs text-gray-500">
+                            ₹{product.totalRevenue || 0}
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {formatPrice(product.price)}
-                      </div>
-                      {product.discountedPrice && (
-                        <div className="text-xs text-gray-400 line-through">
-                          {formatPrice(product.discountedPrice)}
-                        </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex justify-end space-x-2">
+                            <button
+                              onClick={() => toggleExpand(product.id)}
+                              className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              title={
+                                expandedProductId === product.id
+                                  ? "Hide Details"
+                                  : "View Details"
+                              }
+                            >
+                              {expandedProductId === product.id ? (
+                                <ChevronUpIcon className="h-5 w-5" />
+                              ) : (
+                                <ChevronDownIcon className="h-5 w-5" />
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                handleToggleStatus(product.id, product.isActive)
+                              }
+                              className={`p-1 rounded-lg transition-colors ${
+                                product.isActive
+                                  ? "text-red-600 hover:bg-red-50"
+                                  : "text-green-600 hover:bg-green-50"
+                              }`}
+                              title={
+                                product.isActive ? "Deactivate" : "Activate"
+                              }
+                            >
+                              {product.isActive ? (
+                                <XCircleIcon className="h-5 w-5" />
+                              ) : (
+                                <CheckCircleIcon className="h-5 w-5" />
+                              )}
+                            </button>
+
+                            <Link
+                              to={`/affiliate/products/edit/${product.id}`}
+                              className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Edit Product"
+                            >
+                              <PencilSquareIcon className="h-5 w-5" />
+                            </Link>
+
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Product"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Expanded Details Row */}
+                      {expandedProductId === product.id && (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-4 bg-gray-50">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {/* Basic Info */}
+                              <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                  <TagIcon className="h-4 w-4" />
+                                  Basic Information
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">SKU:</span>
+                                    <span className="font-medium">
+                                      {product.sku}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Brand:
+                                    </span>
+                                    <span className="font-medium">
+                                      {product.brand || "N/A"}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Company:
+                                    </span>
+                                    <span className="font-medium">
+                                      {product.company}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Category:
+                                    </span>
+                                    <span className="font-medium">
+                                      {product.Category?.name || "N/A"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Affiliate Info */}
+                              <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                  <LinkIcon className="h-4 w-4" />
+                                  Affiliate Details
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Commission Rate:
+                                    </span>
+                                    <span className="font-medium text-emerald-600">
+                                      {product.commissionRate || "N/A"}%
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Affiliate URL:
+                                    </span>
+                                    <a
+                                      href={product.affiliateUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-medium text-blue-600 hover:underline truncate max-w-[150px]"
+                                    >
+                                      {product.affiliateUrl || "N/A"}
+                                    </a>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Total Earnings:
+                                    </span>
+                                    <span className="font-medium text-emerald-600">
+                                      {formatPrice(
+                                        product.totalCommissionEarned || 0,
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Sales & Dates */}
+                              <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                  <CalendarIcon className="h-4 w-4" />
+                                  Sales & Dates
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Total Sales:
+                                    </span>
+                                    <span className="font-medium">
+                                      {product.purchaseCount || 0}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Total Revenue:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatPrice(product.totalRevenue || 0)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Added:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatDate(product.createdAt)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Last Updated:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatDate(product.updatedAt)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Description (Full width) */}
+                              {product.description && (
+                                <div className="bg-white rounded-lg p-4 shadow-sm md:col-span-2 lg:col-span-3">
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4" />
+                                    Description
+                                  </h4>
+                                  <p className="text-sm text-gray-600">
+                                    {product.description}
+                                  </p>
+                                  {product.shortDescription && (
+                                    <p className="text-sm text-gray-500 mt-2">
+                                      <span className="font-medium">
+                                        Short:
+                                      </span>{" "}
+                                      {product.shortDescription}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Tags - Using safe parsing */}
+                              {tags.length > 0 && (
+                                <div className="bg-white rounded-lg p-4 shadow-sm md:col-span-2 lg:col-span-3">
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Tags
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {tags.map((tag, index) => (
+                                      <span
+                                        key={index}
+                                        className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Specifications - Using safe parsing */}
+                              {Object.keys(specifications).length > 0 && (
+                                <div className="bg-white rounded-lg p-4 shadow-sm md:col-span-2 lg:col-span-3">
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Specifications
+                                  </h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {Object.entries(specifications).map(
+                                      ([key, value]) => (
+                                        <div
+                                          key={key}
+                                          className="flex justify-between border-b border-gray-100 py-1"
+                                        >
+                                          <span className="text-sm text-gray-500">
+                                            {key}:
+                                          </span>
+                                          <span className="text-sm font-medium">
+                                            {String(value)}
+                                          </span>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`text-sm font-medium ${
-                          product.stock > 10
-                            ? "text-green-600"
-                            : product.stock > 0
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                        }`}
-                      >
-                        {product.stock > 0 ? product.stock : "Out of Stock"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(product.isActive)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {product.purchaseCount || 0} sold
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        ₹{product.totalRevenue || 0}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
-                        <Link
-                          to={`/product/${product.slug}`}
-                          target="_blank"
-                          className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          title="View Product"
-                        >
-                          <EyeIcon className="h-5 w-5" />
-                        </Link>
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(product.id, product.isActive)
-                          }
-                          className={`p-1 rounded-lg transition-colors ${
-                            product.isActive
-                              ? "text-red-600 hover:bg-red-50"
-                              : "text-green-600 hover:bg-green-50"
-                          }`}
-                          title={product.isActive ? "Deactivate" : "Activate"}
-                        >
-                          {product.isActive ? (
-                            <XCircleIcon className="h-5 w-5" />
-                          ) : (
-                            <CheckCircleIcon className="h-5 w-5" />
-                          )}
-                        </button>
-                        <Link
-                          to={`/affiliate/products/edit/${product.id}`}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit Product"
-                        >
-                          <PencilSquareIcon className="h-5 w-5" />
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete Product"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
