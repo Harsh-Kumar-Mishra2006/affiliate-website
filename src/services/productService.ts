@@ -3,7 +3,7 @@ import api from './apiService';
 import { type Product, type ProductResponse, type ProductFilters, type AddProductData } from '../types/product.types';
 
 class ProductService {
-  // ============ PUBLIC ROUTES (Anyone can view) ============
+  // ============ PUBLIC ROUTES ============
   
   async getProducts(filters: ProductFilters = {}): Promise<ProductResponse> {
     const params = new URLSearchParams();
@@ -33,19 +33,26 @@ class ProductService {
 
   // ============ ADMIN & AFFILIATE ROUTES ============
   
-  // ✅ Create product (Admin & Affiliate)
-  async createProduct(data: AddProductData): Promise<{ success: boolean; data: Product; message: string }> {
-    return await api.post('/products', data);
+  // ✅ Create product with file upload (Admin & Affiliate)
+  async createProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
+    return await api.post('/products', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   }
 
-  // ✅ Update product (Admin & Affiliate - with restrictions)
-  async updateProduct(id: string | number, data: Partial<Product>): Promise<{ success: boolean; data: Product }> {
-    return await api.put(`/products/${id}`, data);
+  // ✅ Update product with file upload (Admin & Affiliate)
+  async updateProduct(id: string | number, data: FormData): Promise<{ success: boolean; data: Product }> {
+    return await api.put(`/products/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   }
 
   // ============ ADMIN ONLY ROUTES ============
   
-  // ✅ Get all products including inactive (Admin only)
   async getAdminProducts(params?: { page?: number; limit?: number; showInactive?: boolean }): Promise<{
     success: boolean;
     data: {
@@ -69,22 +76,18 @@ class ProductService {
     return await api.get(`/admin/products?${queryParams.toString()}`);
   }
 
-  // ✅ Delete product (Admin only)
   async deleteProduct(id: string | number): Promise<{ success: boolean; message: string }> {
     return await api.delete(`/products/${id}`);
   }
 
-  // ✅ Get product statistics (Admin only)
   async getProductStats(): Promise<{ success: boolean; data: any }> {
     return await api.get('/products/stats');
   }
 
-  // ✅ Bulk upload products (Admin only)
   async bulkUploadProducts(products: AddProductData[]): Promise<{ success: boolean; data: any }> {
     return await api.post('/products/bulk', { products });
   }
 
-  // ✅ Get admin products with commission (Admin only)
   async getAdminCommissionProducts(params?: { page?: number; limit?: number }): Promise<{
     success: boolean;
     data: {
@@ -114,7 +117,6 @@ class ProductService {
 
   // ============ AFFILIATE ROUTES ============
 
-  // ✅ Get affiliate products (Affiliate users only)
   async getAffiliateProducts(params?: { page?: number; limit?: number }): Promise<{
     success: boolean;
     data: {
@@ -138,7 +140,6 @@ class ProductService {
     return await api.get(`/affiliate/products?${queryParams.toString()}`);
   }
 
-  // ✅ Get affiliate stats (Affiliate users only)
   async getAffiliateStats(): Promise<{
     success: boolean;
     data: {
