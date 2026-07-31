@@ -1,5 +1,9 @@
 // services/apiService.ts
-import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
+import axios, { 
+  type AxiosInstance, 
+  type AxiosRequestConfig, 
+  type InternalAxiosRequestConfig 
+} from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://affiliate-website-backend.onrender.com/api';
 
@@ -15,7 +19,7 @@ class ApiService {
       timeout: 30000,
     });
 
-    // Request interceptor to add token
+    // Request interceptor to add token and handle FormData
     this.api.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
@@ -25,6 +29,13 @@ class ApiService {
         } else {
           console.log(`ℹ️ Request: ${config.method?.toUpperCase()} ${config.url} - No token`);
         }
+
+        // ✅ CRITICAL FIX: If data is FormData, remove Content-Type to let browser set it
+        if (config.data instanceof FormData) {
+          console.log('📤 Uploading FormData - Removing Content-Type header');
+          delete config.headers['Content-Type'];
+        }
+
         return config;
       },
       (error) => {
@@ -63,7 +74,17 @@ class ApiService {
         if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
           console.error('❌ Network error occurred');
         }
-        
+
+        // Log error details for debugging
+        if (error.response) {
+          console.error('❌ API Error Response:', {
+            status: error.response.status,
+            data: error.response.data,
+            url: error.config?.url,
+            method: error.config?.method,
+          });
+        }
+
         return Promise.reject(error);
       }
     );
@@ -74,10 +95,12 @@ class ApiService {
   }
 
   public post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    // ✅ If data is FormData, let the interceptor handle it
     return this.api.post(url, data, config).then((res) => res.data);
   }
 
   public put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    // ✅ If data is FormData, let the interceptor handle it
     return this.api.put(url, data, config).then((res) => res.data);
   }
 
@@ -86,6 +109,7 @@ class ApiService {
   }
 
   public patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    // ✅ If data is FormData, let the interceptor handle it
     return this.api.patch(url, data, config).then((res) => res.data);
   }
 }
