@@ -10,7 +10,6 @@ import {
   UserPlusIcon,
   Bars3Icon,
   XMarkIcon,
-  ShieldCheckIcon,
   PlusIcon,
   ShoppingCartIcon,
   CurrencyRupeeIcon,
@@ -64,13 +63,6 @@ const Navbar: React.FC = () => {
       path: "/profile",
       icon: UserIcon,
       show: isAuthenticated,
-    },
-    // ✅ Admin links - Product Management
-    {
-      name: "Admin Panel",
-      path: "/admin/products",
-      icon: ShieldCheckIcon,
-      show: isAdmin(),
     },
     {
       name: "All Products",
