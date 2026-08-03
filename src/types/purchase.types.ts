@@ -1,3 +1,4 @@
+// types/purchase.types.ts
 export interface Purchase {
   id: number;
   userId: number;
@@ -10,6 +11,8 @@ export interface Purchase {
   totalAmount: number;
   commissionAmount: number;
   commissionRate: number;
+  adminCommissionAmount: number;
+  adminCommissionRate: number;
   status: 'pending' | 'paid' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'verified' | 'rejected';
   paymentScreenshot?: {
@@ -17,6 +20,10 @@ export interface Purchase {
     url: string;
     originalName: string;
     size: number;
+    format?: string;
+    width?: number;
+    height?: number;
+    uploadedAt?: string;
   };
   paymentVerifiedBy?: number;
   paymentVerifiedAt?: string;
@@ -34,12 +41,24 @@ export interface Purchase {
     mainImage: string;
     company: string;
     price: number;
+    addedByRole?: 'admin' | 'affiliate';
   };
   affiliate?: {
     id: number;
     name: string;
     email: string;
     affiliateId: string;
+  };
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  paymentVerifiedByUser?: {
+    id: number;
+    name: string;
+    email: string;
   };
 }
 
@@ -61,6 +80,8 @@ export interface InitiatePurchaseResponse {
     totalAmount: number;
     commissionRate: number;
     commissionAmount: number;
+    adminCommissionAmount: number;
+    productOwner: 'admin' | 'affiliate';
     paymentInstructions: {
       upiId: string;
       bankDetails: {
@@ -70,6 +91,12 @@ export interface InitiatePurchaseResponse {
         accountHolder: string;
       };
       amount: number;
+      affiliateInfo?: {
+        name: string;
+        email: string;
+        commissionRate: number;
+        commissionAmount: number;
+      };
     };
   };
   message: string;
@@ -90,6 +117,7 @@ export interface PurchaseResponse {
       pending: number;
       verified: number;
       completed: number;
+      rejected: number;
     };
     pagination: {
       total: number;

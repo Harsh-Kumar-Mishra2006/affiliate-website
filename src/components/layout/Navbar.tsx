@@ -108,6 +108,12 @@ const Navbar: React.FC = () => {
       icon: ShoppingBagIcon,
       show: isAffiliate(),
     },
+    {
+      name: "Customer Purchases",
+      path: "/admin/customer-purchases",
+      icon: ShoppingCartIcon,
+      show: isAdmin(),
+    },
   ];
 
   return (
