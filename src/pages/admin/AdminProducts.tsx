@@ -11,7 +11,7 @@ import {
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
-  EyeIcon,
+  // EyeIcon,
   CheckCircleIcon,
   XCircleIcon,
   ShoppingBagIcon,
@@ -398,7 +398,7 @@ const AdminProducts: React.FC = () => {
                               className="p-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                               title="View Product"
                             >
-                              <EyeIcon className="h-5 w-5" />
+                              {/* <EyeIcon className="h-5 w-5" /> */}
                             </Link>
                             <button
                               onClick={() =>
