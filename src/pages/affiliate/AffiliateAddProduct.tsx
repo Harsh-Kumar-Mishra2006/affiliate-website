@@ -407,14 +407,14 @@ const AffiliateAddProduct: React.FC = () => {
               <div>
                 <Input
                   label="Commission Rate (%)"
-                  type="number"
+                  type="text"
                   name="commissionRate"
-                  placeholder="10-25%"
+                  // placeholder="10-25%"
                   value={formData.commissionRate}
                   onChange={handleChange}
                   error={errors.commissionRate}
                   required
-                  helperText="Set between 10% and 25%"
+                  helperText="Set below 25%"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   Admin will receive this commission on sales
