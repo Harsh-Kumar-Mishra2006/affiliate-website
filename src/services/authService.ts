@@ -4,11 +4,12 @@ import {
   type AuthResponse,
   type LoginCredentials,
   type SignupCredentials,
-  type AdminSignupCredentials,
   type ChangePasswordData,
   type ForgotPasswordData,
   type ResetPasswordData,
   type User,
+  type UserListResponse,
+  type AffiliateDetails,
 } from '../types/auth.types';
 
 class AuthService {
@@ -32,7 +33,6 @@ class AuthService {
 
   async signup(data: SignupCredentials): Promise<AuthResponse> {
     try {
-      // Use the unified signup endpoint
       const response = await api.post<AuthResponse>('/auth/signup', data);
       if (response.success && response.data) {
         this.setToken(response.data.token);
@@ -44,11 +44,6 @@ class AuthService {
       console.error('❌ Signup error:', error);
       throw error;
     }
-  }
-
-  // Keep for backward compatibility
-  async adminSignup(data: AdminSignupCredentials): Promise<AuthResponse> {
-    return this.signup({ ...data, role: 'admin' });
   }
 
   async changePassword(data: ChangePasswordData): Promise<AuthResponse> {
@@ -128,6 +123,122 @@ class AuthService {
       throw error;
     }
   }
+
+  // ============= ADMIN ROUTES =============
+
+  // ✅ FIXED: Properly type the response
+  async getAllUsers(params?: {
+    role?: string;
+    search?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<UserListResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      const response = await api.get<any>(`/auth/admin/users?${queryParams.toString()}`);
+      // ✅ Ensure the response matches the expected type
+      return {
+        success: response.success || false,
+        data: response.data || { users: [], summary: { totalUsers: 0, totalAdmins: 0, totalAffiliates: 0, totalCustomers: 0, activeUsers: 0, inactiveUsers: 0 }, pagination: { total: 0, page: 1, limit: 20, totalPages: 1 } }
+      };
+    } catch (error) {
+      console.error('❌ Get all users error:', error);
+      throw error;
+    }
+  }
+
+  // ✅ FIXED: Properly type the response
+  async getAffiliateDetails(id: number): Promise<{ success: boolean; data: AffiliateDetails }> {
+    try {
+      const response = await api.get<any>(`/auth/admin/affiliates/${id}/details`);
+      return {
+        success: response.success || false,
+        data: response.data || null
+      };
+    } catch (error) {
+      console.error('❌ Get affiliate details error:', error);
+      throw error;
+    }
+  }
+
+  // ✅ FIXED: Properly type the response
+  async getDashboardStats(): Promise<{
+    success: boolean;
+    data: {
+      recentUsers: User[];
+      recentPurchases: any[];
+      recentCommissions: any[];
+    };
+  }> {
+    try {
+      const response = await api.get<any>('/auth/admin/dashboard-stats');
+      return {
+        success: response.success || false,
+        data: response.data || { recentUsers: [], recentPurchases: [], recentCommissions: [] }
+      };
+    } catch (error) {
+      console.error('❌ Get dashboard stats error:', error);
+      throw error;
+    }
+  }
+
+  // ✅ FIXED: Properly type the response
+  async bulkUpdateUsers(userIds: number[], action: string, data?: any): Promise<{
+    success: boolean;
+    data: { results: any[] };
+    message: string;
+  }> {
+    try {
+      const response = await api.post<any>('/auth/admin/users/bulk', {
+        userIds,
+        action,
+        data
+      });
+      return {
+        success: response.success || false,
+        data: response.data || { results: [] },
+        message: response.message || 'Bulk update completed'
+      };
+    } catch (error) {
+      console.error('❌ Bulk update users error:', error);
+      throw error;
+    }
+  }
+
+  // ✅ FIXED: Properly type the response
+  async exportUsersData(role?: string): Promise<{
+    success: boolean;
+    data: {
+      users: any[];
+      total: number;
+      exportedAt: string;
+    };
+  }> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (role && role !== 'all') {
+        queryParams.append('role', role);
+      }
+      const response = await api.get<any>(`/auth/admin/users/export?${queryParams.toString()}`);
+      return {
+        success: response.success || false,
+        data: response.data || { users: [], total: 0, exportedAt: new Date().toISOString() }
+      };
+    } catch (error) {
+      console.error('❌ Export users data error:', error);
+      throw error;
+    }
+  }
+
+  // ============= AUTH UTILITIES =============
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);

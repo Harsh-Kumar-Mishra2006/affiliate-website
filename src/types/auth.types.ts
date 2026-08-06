@@ -1,4 +1,4 @@
-// auth.types.ts
+// types/auth.types.ts
 export interface User {
   id: number;
   name: string;
@@ -19,6 +19,83 @@ export interface User {
   paymentDetails?: any;
   createdAt: string;
   updatedAt: string;
+  addedBy?: number;
+  addedByUser?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface UserWithStats extends User {
+  stats?: {
+    totalProducts?: number;
+    totalCommissions?: number;
+    pendingCommissions?: number;
+    approvedCommissions?: number;
+    paidCommissions?: number;
+    totalEarnings?: number;
+    availableBalance?: number;
+    totalAdminCommissions?: number;
+    totalPurchases?: number;
+    totalRevenue?: number;
+  };
+}
+
+export interface AffiliateDetails extends User {
+  stats: {
+    products: {
+      total: number;
+      active: number;
+      inactive: number;
+    };
+    purchases: {
+      total: number;
+      revenue: number;
+    };
+    commissions: {
+      total: number;
+      pending: number;
+      approved: number;
+      paid: number;
+      rejected: number;
+    };
+    links: {
+      total: number;
+      totalClicks: number;
+      uniqueClicks: number;
+      conversions: number;
+      totalCommission: number;
+    };
+    earnings: {
+      totalEarnings: number;
+      availableBalance: number;
+    };
+  };
+  recentPurchases: any[];
+  recentCommissions: any[];
+  products: any[];
+}
+
+export interface UserListResponse {
+  success: boolean;
+  data: {
+    users: UserWithStats[];
+    summary: {
+      totalUsers: number;
+      totalAdmins: number;
+      totalAffiliates: number;
+      totalCustomers: number;
+      activeUsers: number;
+      inactiveUsers: number;
+    };
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
 }
 
 export interface AuthResponse {
@@ -48,9 +125,6 @@ export interface SignupCredentials {
   paymentDetails?: any;
 }
 
-// Keep for backward compatibility
-export interface AdminSignupCredentials extends SignupCredentials {}
-
 export interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
@@ -74,7 +148,6 @@ export interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   signup: (data: SignupCredentials) => Promise<void>;
-  adminSignup: (data: AdminSignupCredentials) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   forgotPassword: (data: ForgotPasswordData) => Promise<void>;
   resetPassword: (data: ResetPasswordData) => Promise<void>;
