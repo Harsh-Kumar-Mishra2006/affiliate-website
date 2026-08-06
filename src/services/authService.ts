@@ -4,6 +4,7 @@ import {
   type AuthResponse,
   type LoginCredentials,
   type SignupCredentials,
+  type AdminSignupCredentials,
   type ChangePasswordData,
   type ForgotPasswordData,
   type ResetPasswordData,
@@ -45,6 +46,28 @@ class AuthService {
       throw error;
     }
   }
+
+  // services/authService.ts - Add this method
+
+// ============= ADMIN SIGNUP =============
+async adminSignup(data: AdminSignupCredentials): Promise<AuthResponse> {
+  try {
+    // Use the unified signup endpoint with admin role
+    const response = await api.post<AuthResponse>('/auth/signup', {
+      ...data,
+      role: 'admin'
+    });
+    if (response.success && response.data) {
+      this.setToken(response.data.token);
+      this.setUser(response.data.user);
+      console.log('✅ Admin signup successful for:', response.data.user.email);
+    }
+    return response;
+  } catch (error) {
+    console.error('❌ Admin signup error:', error);
+    throw error;
+  }
+}
 
   async changePassword(data: ChangePasswordData): Promise<AuthResponse> {
     try {

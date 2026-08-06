@@ -125,6 +125,11 @@ export interface SignupCredentials {
   paymentDetails?: any;
 }
 
+// ✅ ADD THIS BACK
+export interface AdminSignupCredentials extends SignupCredentials {
+  // Admin-specific fields can be added here if needed
+}
+
 export interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
@@ -148,6 +153,7 @@ export interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   signup: (data: SignupCredentials) => Promise<void>;
+  adminSignup: (data: AdminSignupCredentials) => Promise<void>; // ✅ ADD THIS
   changePassword: (data: ChangePasswordData) => Promise<void>;
   forgotPassword: (data: ForgotPasswordData) => Promise<void>;
   resetPassword: (data: ResetPasswordData) => Promise<void>;
