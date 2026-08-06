@@ -9,7 +9,7 @@ import Button from "../../components/common/Button";
 import toast from "react-hot-toast";
 import {
   PlusIcon,
-  PencilSquareIcon,
+  // PencilSquareIcon,
   TrashIcon,
   // EyeIcon,
   CheckCircleIcon,
@@ -322,6 +322,15 @@ const AdminProducts: React.FC = () => {
                               <div className="text-sm text-gray-500">
                                 {product.company} • {product.Category?.name}
                               </div>
+                              {/* ✅ NEW: Service ID display */}
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">
+                                  Service ID:
+                                </span>
+                                <span className="font-medium text-purple-600">
+                                  {product.serviceId || "N/A"}
+                                </span>
+                              </div>
                               {product.sku && (
                                 <div className="text-xs text-gray-400">
                                   SKU: {product.sku}
@@ -334,11 +343,6 @@ const AdminProducts: React.FC = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {formatPrice(product.price)}
                           </div>
-                          {product.discountedPrice && (
-                            <div className="text-xs text-gray-400 line-through">
-                              {formatPrice(product.discountedPrice)}
-                            </div>
-                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -419,13 +423,13 @@ const AdminProducts: React.FC = () => {
                                 <CheckCircleIcon className="h-5 w-5" />
                               )}
                             </button>
-                            <Link
+                            {/* <Link
                               to={`/admin/products/edit/${product.id}`}
                               className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit Product"
                             >
                               <PencilSquareIcon className="h-5 w-5" />
-                            </Link>
+                            </Link> */}
                             <button
                               onClick={() => handleDeleteProduct(product.id)}
                               className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

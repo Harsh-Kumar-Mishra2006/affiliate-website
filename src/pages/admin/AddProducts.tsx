@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   CloudArrowUpIcon,
+  IdentificationIcon, // ✅ NEW: For service ID
 } from "@heroicons/react/24/outline";
 
 const AddProduct: React.FC = () => {
@@ -28,7 +29,8 @@ const AddProduct: React.FC = () => {
     category: "",
     description: "",
     shortDescription: "",
-    discountedPrice: "",
+    // ❌ REMOVED: discountedPrice
+    serviceId: "", // ✅ NEW: Service ID field
     brand: "",
     stock: "",
     images: [] as File[],
@@ -79,10 +81,9 @@ const AddProduct: React.FC = () => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Validate file types and sizes
     const validFiles = files.filter((file) => {
       const isValidType = file.type.startsWith("image/");
-      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+      const isValidSize = file.size <= 5 * 1024 * 1024;
       if (!isValidType) {
         toast.error(`${file.name} is not a valid image file`);
       }
@@ -94,13 +95,11 @@ const AddProduct: React.FC = () => {
 
     if (validFiles.length === 0) return;
 
-    // Check total images limit (max 10)
     if (formData.images.length + validFiles.length > 10) {
       toast.error("Maximum 10 images allowed");
       return;
     }
 
-    // Create previews
     const previews = validFiles.map((file) => URL.createObjectURL(file));
 
     setFormData((prev) => ({
@@ -109,7 +108,6 @@ const AddProduct: React.FC = () => {
       imagePreviews: [...prev.imagePreviews, ...previews],
     }));
 
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -183,10 +181,8 @@ const AddProduct: React.FC = () => {
     setUploadProgress(0);
 
     try {
-      // Create FormData for file upload
       const formDataToSend = new FormData();
 
-      // Add text fields
       const textFields = {
         name: formData.name,
         productId: formData.productId,
@@ -195,7 +191,8 @@ const AddProduct: React.FC = () => {
         category: formData.category,
         description: formData.description,
         shortDescription: formData.shortDescription,
-        discountedPrice: formData.discountedPrice,
+        // ❌ REMOVED: discountedPrice
+        serviceId: formData.serviceId, // ✅ NEW: Add serviceId
         brand: formData.brand,
         stock: formData.stock,
         tags: JSON.stringify(formData.tags),
@@ -210,7 +207,6 @@ const AddProduct: React.FC = () => {
         }
       });
 
-      // Add images
       formData.images.forEach((file) => {
         formDataToSend.append("images", file);
       });
@@ -298,14 +294,28 @@ const AddProduct: React.FC = () => {
                 error={errors.price}
                 required
               />
-              <Input
-                label="Discounted Price (₹)"
-                type="number"
-                name="discountedPrice"
-                placeholder="Enter discounted price"
-                value={formData.discountedPrice}
-                onChange={handleChange}
-              />
+              {/* ✅ NEW: Service ID Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Service ID
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <IdentificationIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="serviceId"
+                    placeholder="Enter service ID (optional)"
+                    value={formData.serviceId}
+                    onChange={handleChange}
+                    className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Optional: Manual identifier for your service/product
+                </p>
+              </div>
               <Input
                 label="Company Name"
                 type="text"

@@ -9,7 +9,7 @@ import Button from "../../components/common/Button";
 import toast from "react-hot-toast";
 import {
   PlusIcon,
-  PencilSquareIcon,
+  // PencilSquareIcon,
   TrashIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -264,6 +264,7 @@ const AffiliateProducts: React.FC = () => {
                               <div className="text-sm font-medium text-gray-900">
                                 {product.name}
                               </div>
+
                               <div className="text-sm text-gray-500">
                                 {product.company} • {product.Category?.name}
                               </div>
@@ -274,11 +275,6 @@ const AffiliateProducts: React.FC = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {formatPrice(product.price)}
                           </div>
-                          {product.discountedPrice && (
-                            <div className="text-xs text-gray-400 line-through">
-                              {formatPrice(product.discountedPrice)}
-                            </div>
-                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -304,6 +300,12 @@ const AffiliateProducts: React.FC = () => {
                             ₹{product.totalRevenue || 0}
                           </div>
                         </td>
+                        <div className="mt-1">
+                          <span className="text-xs text-gray-400">
+                            Service ID: {product.serviceId}
+                          </span>
+                        </div>
+
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
                             <button
@@ -342,13 +344,13 @@ const AffiliateProducts: React.FC = () => {
                               )}
                             </button>
 
-                            <Link
+                            {/* <Link
                               to={`/affiliate/products/edit/${product.id}`}
                               className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit Product"
                             >
                               <PencilSquareIcon className="h-5 w-5" />
-                            </Link>
+                            </Link> */}
 
                             <button
                               onClick={() => handleDeleteProduct(product.id)}

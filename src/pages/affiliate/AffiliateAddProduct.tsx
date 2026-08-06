@@ -29,7 +29,7 @@ const AffiliateAddProduct: React.FC = () => {
     category: "",
     description: "",
     shortDescription: "",
-    discountedPrice: "",
+    serviceId: "",
     brand: "",
     stock: "",
     affiliateUrl: "",
@@ -206,7 +206,7 @@ const AffiliateAddProduct: React.FC = () => {
         category: formData.category,
         description: formData.description,
         shortDescription: formData.shortDescription,
-        discountedPrice: formData.discountedPrice,
+        serviceId: formData.serviceId,
         brand: formData.brand,
         stock: formData.stock,
         affiliateUrl: formData.affiliateUrl,
@@ -338,11 +338,11 @@ const AffiliateAddProduct: React.FC = () => {
                 required
               />
               <Input
-                label="Discounted Price (₹)"
-                type="number"
-                name="discountedPrice"
-                placeholder="Enter discounted price"
-                value={formData.discountedPrice}
+                label="ServiceId"
+                type="string"
+                name="serviceId"
+                placeholder="Enter serviceId"
+                value={formData.serviceId}
                 onChange={handleChange}
               />
               <Input

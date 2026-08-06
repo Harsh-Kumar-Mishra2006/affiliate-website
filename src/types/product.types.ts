@@ -6,7 +6,8 @@ export interface Product {
   description: string;
   shortDescription?: string;
   price: number;
-  discountedPrice?: number;
+  // ❌ REMOVED: discountedPrice
+  serviceId?: string; // ✅ NEW: Manual service ID
   company: string;
   categoryId: number;
   brand?: string;
@@ -54,7 +55,8 @@ export interface AddProductData {
   category: string;
   description?: string;
   shortDescription?: string;
-  discountedPrice?: number;
+  // ❌ REMOVED: discountedPrice
+  serviceId?: string; // ✅ NEW: Manual service ID
   brand?: string;
   sku?: string;
   stock?: number;
