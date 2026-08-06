@@ -398,18 +398,7 @@ const Products: React.FC = () => {
                         }`}
                       />
                     </button>
-                    {/* Discount Badge */}
-                    {product.discountedPrice &&
-                      product.discountedPrice < product.price && (
-                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                          {Math.round(
-                            ((product.price - product.discountedPrice) /
-                              product.price) *
-                              100,
-                          )}
-                          % OFF
-                        </div>
-                      )}
+
                     {/* Stock Badge */}
                     {product.stock === 0 && (
                       <div className="absolute bottom-2 left-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded">
@@ -435,13 +424,8 @@ const Products: React.FC = () => {
                   {/* Price */}
                   <div className="mt-3 flex items-center space-x-2">
                     <span className="text-xl font-bold text-gray-900">
-                      {formatPrice(product.discountedPrice || product.price)}
+                      {formatPrice(product.price)}
                     </span>
-                    {product.discountedPrice && (
-                      <span className="text-sm text-gray-400 line-through">
-                        {formatPrice(product.price)}
-                      </span>
-                    )}
                   </div>
 
                   {/* Category Tag */}
