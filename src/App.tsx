@@ -24,9 +24,6 @@ import Products from "./pages/Products";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AddProduct from "./pages/admin/AddProducts";
 
-// Affiliate Pages (Keep for later use)
-import AffiliateProducts from "./pages/affiliate/AffiliateProducts";
-
 // Purchase Pages
 import PurchaseDetails from "./pages/purchase/PurchaseDetails";
 import PaymentPage from "./pages/purchase/PaymentPage";
@@ -200,14 +197,6 @@ const AppRoutes: React.FC = () => {
         element={
           <RoleRoute roles={["affiliate", "admin"]}>
             <Navigate to="/affiliate/products" replace />
-          </RoleRoute>
-        }
-      />
-      <Route
-        path="/affiliate/products"
-        element={
-          <RoleRoute roles={["affiliate", "admin"]}>
-            <AffiliateProducts />
           </RoleRoute>
         }
       />
