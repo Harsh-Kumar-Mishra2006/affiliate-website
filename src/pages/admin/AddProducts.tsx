@@ -11,7 +11,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
-// Import the two forms
+// ✅ FIX: Correct import paths
 import AddAdminProductForm from "../../components/forms/AddAdminProductsForm";
 import AddAffiliateProductForm from "../../components/forms/AddAffiliateProductsForm";
 

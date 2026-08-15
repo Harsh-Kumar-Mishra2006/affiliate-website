@@ -31,11 +31,18 @@ class ProductService {
     return await api.get(`/products/search?q=${query}&page=${page}&limit=${limit}`);
   }
 
-  // ============ ADMIN & AFFILIATE ROUTES ============
-  
-  // ✅ Create product with file upload (Admin & Affiliate)
-  async createProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
-    return await api.post('/products', data, {
+  // ============ ADMIN: Add Admin's Own Product ============
+  async addAdminProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
+    return await api.post('/admin/products/add', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
+  // ============ ADMIN: Add Affiliate Product ============
+  async addAffiliateProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
+    return await api.post('/admin/products/add-affiliate', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -53,7 +60,7 @@ class ProductService {
 
   // ============ ADMIN ONLY ROUTES ============
   
-  async getAdminProducts(params?: { page?: number; limit?: number; showInactive?: boolean }): Promise<{
+  async getAdminProducts(params?: { page?: number; limit?: number; showInactive?: boolean; type?: 'admin' | 'affiliate' }): Promise<{
     success: boolean;
     data: {
       products: Product[];
@@ -81,11 +88,11 @@ class ProductService {
   }
 
   async getProductStats(): Promise<{ success: boolean; data: any }> {
-    return await api.get('/products/stats');
+    return await api.get('/admin/products/stats');
   }
 
   async bulkUploadProducts(products: AddProductData[]): Promise<{ success: boolean; data: any }> {
-    return await api.post('/products/bulk', { products });
+    return await api.post('/admin/products/bulk', { products });
   }
 
   async getAdminCommissionProducts(params?: { page?: number; limit?: number }): Promise<{
@@ -112,7 +119,7 @@ class ProductService {
         }
       });
     }
-    return await api.get(`/admin/products/commission?${queryParams.toString()}`);
+    return await api.get(`/admin/products/affiliate?${queryParams.toString()}`);
   }
 
   // ============ AFFILIATE ROUTES ============
@@ -121,6 +128,10 @@ class ProductService {
     success: boolean;
     data: {
       products: Product[];
+      stats?: {
+        totalProducts: number;
+        totalCommissionEarned: number;
+      };
       pagination: {
         total: number;
         page: number;
@@ -150,7 +161,5 @@ class ProductService {
     return await api.get('/affiliate/products/stats');
   }
 }
-
-
 
 export default new ProductService();
