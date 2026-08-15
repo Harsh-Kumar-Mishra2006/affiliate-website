@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import {
   UserIcon,
   ShoppingBagIcon,
-  CreditCardIcon,
+  // CreditCardIcon,
   ClockIcon,
   CheckCircleIcon,
   UsersIcon,
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         {/* Admin Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          {/* <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Revenue</p>
@@ -202,7 +202,7 @@ const Dashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Recent Activity */}
@@ -226,9 +226,9 @@ const Dashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Joined
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                  {/* <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                     Action
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -276,12 +276,12 @@ const Dashboard: React.FC = () => {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
+                      {/* <button
                         onClick={() => navigate(`/admin/users/${user.id}`)}
                         className="text-purple-600 hover:text-purple-900 text-sm font-medium"
                       >
                         View
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
