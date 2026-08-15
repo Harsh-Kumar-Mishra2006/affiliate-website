@@ -11,7 +11,9 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+// ✅ Import the authService to get the token
 import api from "../../services/apiService";
+import authService from "../../services/authService";
 
 interface AddAffiliateProductFormProps {
   onSubmit: (formData: FormData) => Promise<void>;
@@ -69,24 +71,51 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
   const fetchAffiliates = async () => {
     setLoadingAffiliates(true);
     try {
-      // ✅ Use type assertion
-      const response = (await api.get("/auth/affiliates")) as {
-        data: {
-          success: boolean;
-          data: Affiliate[];
-        };
-      };
-
-      if (response.data.success) {
-        setAffiliates(response.data.data);
+      // ✅ Check if user is authenticated
+      if (!authService.isAuthenticated()) {
+        console.warn("User not authenticated, cannot fetch affiliates");
+        toast.error("Please login to load affiliates");
+        setLoadingAffiliates(false);
+        return;
       }
-    } catch (error) {
-      console.error("Failed to fetch affiliates:", error);
-      toast.error("Failed to load affiliates list");
+
+      console.log("🔍 Fetching affiliates...");
+
+      // ✅ Use the correct endpoint with authentication
+      const response = await api.get<{
+        success: boolean;
+        data: Affiliate[];
+      }>("/auth/affiliates");
+
+      console.log("📊 Affiliates response:", response);
+
+      if (response.success) {
+        setAffiliates(response.data || []);
+        console.log(`✅ Loaded ${response.data?.length || 0} affiliates`);
+      } else {
+        console.warn("⚠️ Affiliates request returned success: false");
+        setAffiliates([]);
+      }
+    } catch (error: any) {
+      console.error("❌ Failed to fetch affiliates:", error);
+
+      // ✅ Show more specific error message
+      if (error.response?.status === 401) {
+        toast.error("Please login to load affiliates");
+      } else if (error.response?.status === 403) {
+        toast.error("You don't have permission to view affiliates");
+      } else {
+        toast.error(
+          error.response?.data?.error || "Failed to load affiliates list",
+        );
+      }
+      setAffiliates([]);
     } finally {
       setLoadingAffiliates(false);
     }
   };
+
+  // ... rest of the component remains the same ...
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -302,6 +331,11 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
             </select>
             {errors.affiliateId && (
               <p className="text-red-500 text-sm mt-1">{errors.affiliateId}</p>
+            )}
+            {!loadingAffiliates && affiliates.length === 0 && (
+              <p className="text-yellow-500 text-sm mt-1">
+                No affiliates found. Please create an affiliate first.
+              </p>
             )}
           </div>
 
