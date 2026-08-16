@@ -355,6 +355,20 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
 
           <div className="md:col-span-2">
             <Input
+              label="affiliateId"
+              type="text"
+              name="affiliateId"
+              placeholder="affiliateId"
+              value={formData.affiliateId}
+              onChange={handleChange}
+              error={errors.affiliateId}
+              required
+              helperText="affiliateId"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Input
               label="Affiliate URL"
               type="text"
               name="affiliateUrl"
