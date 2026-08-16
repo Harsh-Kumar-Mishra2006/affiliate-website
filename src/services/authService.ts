@@ -149,34 +149,53 @@ async adminSignup(data: AdminSignupCredentials): Promise<AuthResponse> {
 
   // ============= ADMIN ROUTES =============
 
-  // ✅ FIXED: Properly type the response
-  async getAllUsers(params?: {
-    role?: string;
-    search?: string;
-    status?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<UserListResponse> {
-    try {
-      const queryParams = new URLSearchParams();
-      if (params) {
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            queryParams.append(key, value.toString());
-          }
-        });
-      }
-      const response = await api.get<any>(`/auth/admin/users?${queryParams.toString()}`);
-      // ✅ Ensure the response matches the expected type
-      return {
-        success: response.success || false,
-        data: response.data || { users: [], summary: { totalUsers: 0, totalAdmins: 0, totalAffiliates: 0, totalCustomers: 0, activeUsers: 0, inactiveUsers: 0 }, pagination: { total: 0, page: 1, limit: 20, totalPages: 1 } }
-      };
-    } catch (error) {
-      console.error('❌ Get all users error:', error);
-      throw error;
+  // services/authService.ts
+
+// The getAllUsers method is already working, but ensure the response type includes all fields
+async getAllUsers(params?: {
+  role?: string;
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}): Promise<UserListResponse> {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value.toString());
+        }
+      });
     }
+    const response = await api.get<any>(`/auth/admin/users?${queryParams.toString()}`);
+    
+    // ✅ Ensure all fields are preserved
+    return {
+      success: response.success || false,
+      data: {
+        users: response.data.users || [],
+        summary: response.data.summary || {
+          totalUsers: 0,
+          totalAdmins: 0,
+          totalAffiliates: 0,
+          totalCustomers: 0,
+          activeUsers: 0,
+          inactiveUsers: 0
+        },
+        pagination: response.data.pagination || {
+          total: 0,
+          page: 1,
+          limit: 20,
+          totalPages: 1
+        }
+      }
+    };
+  } catch (error) {
+    console.error('❌ Get all users error:', error);
+    throw error;
   }
+}
 
   // ✅ FIXED: Properly type the response
   async getAffiliateDetails(id: number): Promise<{ success: boolean; data: AffiliateDetails }> {

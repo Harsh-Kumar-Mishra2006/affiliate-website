@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="space-y-6">
         {/* Admin Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -153,59 +153,9 @@ const Dashboard: React.FC = () => {
               <span className="text-gray-500"> inactive</span>
             </div>
           </div>
-
-          {/* <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-emerald-600">
-                  ₹
-                  {affiliateData?.stats?.purchases?.revenue?.toFixed(2) ||
-                    "0.00"}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                <CurrencyDollarIcon className="h-6 w-6 text-emerald-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Commissions</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  ₹
-                  {affiliateData?.stats?.commissions?.total?.toFixed(2) ||
-                    "0.00"}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <CreditCardIcon className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <span className="text-yellow-600">Pending</span>
-                <p className="text-gray-700">
-                  ₹
-                  {affiliateData?.stats?.commissions?.pending?.toFixed(2) ||
-                    "0.00"}
-                </p>
-              </div>
-              <div>
-                <span className="text-green-600">Paid</span>
-                <p className="text-gray-700">
-                  ₹
-                  {affiliateData?.stats?.commissions?.paid?.toFixed(2) ||
-                    "0.00"}
-                </p>
-              </div>
-            </div>
-          </div> */}
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Users Table - Updated with all columns */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Recent Users
@@ -218,7 +168,19 @@ const Dashboard: React.FC = () => {
                     User
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Username
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Role
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Service ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Password
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Status
@@ -226,14 +188,12 @@ const Dashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Joined
                   </th>
-                  {/* <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Action
-                  </th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {recentActivity.map((user: any) => (
                   <tr key={user.id} className="hover:bg-gray-50">
+                    {/* User Name */}
                     <td className="px-4 py-3">
                       <div className="flex items-center">
                         <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -245,43 +205,87 @@ const Dashboard: React.FC = () => {
                           <p className="text-sm font-medium text-gray-900">
                             {user.name}
                           </p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
                     </td>
+
+                    {/* Username */}
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-gray-900 font-mono">
+                        {user.username || "—"}
+                      </p>
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-gray-900">{user.email}</p>
+                    </td>
+
+                    {/* Role */}
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                        ${
-                          user.role === "admin"
-                            ? "bg-purple-100 text-purple-700"
-                            : user.role === "affiliate"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-gray-100 text-gray-700"
-                        }`}
+                      ${
+                        user.role === "admin"
+                          ? "bg-purple-100 text-purple-700"
+                          : user.role === "affiliate"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
+                      }`}
                       >
                         {user.role?.charAt(0).toUpperCase() +
                           user.role?.slice(1)}
                       </span>
                     </td>
+
+                    {/* Service ID (Affiliate ID) */}
+                    <td className="px-4 py-3">
+                      <span className="text-sm font-mono">
+                        {user.role === "affiliate" ? (
+                          <span className="bg-purple-50 px-2 py-1 rounded text-purple-700">
+                            {user.affiliateId || "—"}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </span>
+                    </td>
+
+                    {/* Password */}
+                    <td className="px-4 py-3">
+                      {user.needsPasswordChange && user.tempPassword ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-mono bg-yellow-50 px-2 py-1 rounded text-yellow-700">
+                            {user.tempPassword}
+                          </span>
+                          <span className="text-xs text-yellow-500">
+                            (temp)
+                          </span>
+                        </div>
+                      ) : user.tempPassword ? (
+                        <span className="text-xs font-mono bg-green-50 px-2 py-1 rounded text-green-700">
+                          {user.tempPassword}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">••••••••</span>
+                      )}
+                    </td>
+
+                    {/* Status */}
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                        ${user.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                      ${user.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                       >
                         {user.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {/* <button
-                        onClick={() => navigate(`/admin/users/${user.id}`)}
-                        className="text-purple-600 hover:text-purple-900 text-sm font-medium"
-                      >
-                        View
-                      </button> */}
+
+                    {/* Joined Date */}
+                    <td className="px-4 py-3">
+                      <span className="text-sm text-gray-600">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </span>
                     </td>
                   </tr>
                 ))}
