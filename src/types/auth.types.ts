@@ -25,6 +25,16 @@ export interface User {
     name: string;
     email: string;
   };
+  serviceId?: string | null;
+  hasTemporaryPassword?: boolean;
+  tempPassword?: string;
+  stats?: {
+    totalProducts?: number;
+    totalCommissions?: number;
+    totalEarnings?: number;
+    totalPurchases?: number;
+    [key: string]: any;
+  };
 }
 
 export interface UserWithStats extends User {
