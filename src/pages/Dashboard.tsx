@@ -95,6 +95,7 @@ const Dashboard: React.FC = () => {
 
   // ============= RENDER FUNCTIONS =============
 
+  // Render Admin Dashboard
   const renderAdminDashboard = () => {
     return (
       <div className="space-y-6">
