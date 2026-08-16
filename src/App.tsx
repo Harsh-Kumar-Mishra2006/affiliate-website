@@ -29,8 +29,8 @@ import PurchaseDetails from "./pages/purchase/PurchaseDetails";
 import PaymentPage from "./pages/purchase/PaymentPage";
 import MyPurchases from "./pages/purchase/MyPurchases";
 import AdminCommission from "./pages/admin/AdminCommission";
-import AffiliateCommission from "./pages/affiliate/AffiliateCommission";
 import CustomerPurchases from "./pages/admin/CustomerPurchases";
+import AffiliatePurchases from "./pages/affiliate/AffiliatePurchases";
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -206,7 +206,7 @@ const AppRoutes: React.FC = () => {
         path="/affiliate/commission"
         element={
           <RoleRoute roles={["affiliate"]}>
-            <AffiliateCommission />
+            <AffiliatePurchases />
           </RoleRoute>
         }
       />

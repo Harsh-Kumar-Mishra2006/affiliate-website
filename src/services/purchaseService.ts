@@ -79,6 +79,79 @@ class PurchaseService {
   async getPurchaseById(id: number): Promise<{ success: boolean; data: Purchase }> {
     return await api.get(`/admin/purchase/${id}`);
   }
+
+   // ============ AFFILIATE ROUTES ============
+  
+  async getAffiliatePurchases(
+    page: number = 1,
+    limit: number = 20,
+    filters?: {
+      paymentStatus?: string;
+      status?: string;
+      search?: string;
+    }
+  ): Promise<{
+    success: boolean;
+    data: {
+      purchases: Purchase[];
+      summary: {
+        total: number;
+        pending: number;
+        verified: number;
+        rejected: number;
+        completed: number;
+        totalRevenue: number;
+        totalAffiliateCommission: number;
+        totalAdminCommission: number;
+        pendingCommission: number;
+        paidCommission: number;
+      };
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    };
+  }> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+    }
+    return await api.get(`/affiliate/purchases?${queryParams.toString()}`);
+  }
+
+  async getAffiliateCommissionSummary(): Promise<{
+    success: boolean;
+    data: {
+      summary: {
+        totalEarnings: number;
+        approved: number;
+        paid: number;
+        pending: number;
+        rejected: number;
+        totalOrders: number;
+        approvedOrders: number;
+        paidOrders: number;
+        pendingOrders: number;
+        totalProducts: number;
+      };
+      monthlyData: Array<{
+        month: string;
+        earnings: number;
+        orders: number;
+      }>;
+      commissions: any[];
+    };
+  }> {
+    return await api.get('/affiliate/commission-summary');
+  }
 }
 
 export default new PurchaseService();
