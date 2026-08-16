@@ -149,7 +149,6 @@ async adminSignup(data: AdminSignupCredentials): Promise<AuthResponse> {
 
   // ============= ADMIN ROUTES =============
 
-  // services/authService.ts
 
 // The getAllUsers method is already working, but ensure the response type includes all fields
 async getAllUsers(params?: {

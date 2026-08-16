@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Recent Users Table - Updated with all columns */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-5">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Recent Users
           </h3>
@@ -180,9 +180,9 @@ const Dashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Service ID
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Password
-                  </th>
+                  </th> */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Status
                   </th>
@@ -252,7 +252,7 @@ const Dashboard: React.FC = () => {
                       </span>
                     </td>
 
-                    {/* Password */}
+                    {/* Password
                     <td className="px-4 py-3">
                       {user.needsPasswordChange && user.tempPassword ? (
                         <div className="flex items-center gap-1">
@@ -268,9 +268,11 @@ const Dashboard: React.FC = () => {
                           {user.tempPassword}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400">••••••••</span>
+                        <span className="text-sm text-gray-400">
+                          {user.tempPassword}
+                        </span>
                       )}
-                    </td>
+                    </td> */}
 
                     {/* Status */}
                     <td className="px-4 py-3">
