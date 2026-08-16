@@ -1,4 +1,45 @@
 // types/purchase.types.ts
+
+
+// ✅ Commission type
+export interface Commission {
+  id: number;
+  affiliateId: number | null;
+  adminId: number;
+  productId: number;
+  purchaseId: number;
+  orderId: string;
+  affiliateCommissionAmount: number;
+  affiliateCommissionRate: number;
+  adminCommissionAmount: number;
+  adminCommissionRate: number;
+  totalAmount: number;
+  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  paymentDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Relations
+  Affiliate?: {
+    id: number;
+    name: string;
+    email: string;
+    affiliateId: string;
+  };
+  Admin?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  Product?: {
+    id: number;
+    name: string;
+    mainImage?: string;
+  };
+  Purchase?: Purchase;
+}
+
 export interface Purchase {
   id: number;
   userId: number;
@@ -60,6 +101,24 @@ export interface Purchase {
     name: string;
     email: string;
   };
+   Commission?: {
+    id: number;
+    affiliateId: number;
+    adminId: number;
+    productId: number;
+    purchaseId: number;
+    orderId: string;
+    affiliateCommissionAmount: number;
+    affiliateCommissionRate: number;
+    adminCommissionAmount: number;
+    adminCommissionRate: number;
+    totalAmount: number;
+    status: 'pending' | 'approved' | 'paid' | 'rejected';
+    paymentDate?: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export interface InitiatePurchaseData {
@@ -102,6 +161,7 @@ export interface InitiatePurchaseResponse {
   message: string;
 }
 
+
 export interface UploadPaymentData {
   orderId: string;
   screenshot: File;
@@ -126,4 +186,33 @@ export interface PurchaseResponse {
       totalPages: number;
     };
   };
+}
+
+export interface PurchaseFilters {
+  page?: number;
+  limit?: number;
+  paymentStatus?: string;
+  status?: string;
+  productOwner?: string;
+  search?: string;
+}
+
+// ✅ Commission Summary Types
+export interface CommissionSummary {
+  totalEarnings: number;
+  approved: number;
+  paid: number;
+  pending: number;
+  rejected: number;
+  totalOrders: number;
+  approvedOrders: number;
+  paidOrders: number;
+  pendingOrders: number;
+  totalProducts: number;
+}
+
+export interface MonthlyCommissionData {
+  month: string;
+  earnings: number;
+  orders: number;
 }

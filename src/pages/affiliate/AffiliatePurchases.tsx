@@ -5,7 +5,6 @@ import { useIsAffiliate } from "../../hooks/useAuth";
 import purchaseService from "../../services/purchaseService";
 import { type Purchase } from "../../types/purchase.types";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import Button from "../../components/common/Button";
 import toast from "react-hot-toast";
 import {
   ShoppingBagIcon,
@@ -22,11 +21,7 @@ import {
   DocumentTextIcon,
   PhotoIcon,
   BanknotesIcon,
-  UserGroupIcon,
   ArrowPathIcon,
-  CheckIcon,
-  XMarkIcon,
-  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 const AffiliatePurchases: React.FC = () => {
@@ -242,7 +237,8 @@ const AffiliatePurchases: React.FC = () => {
                 </h1>
               </div>
               <p className="text-gray-600 mt-1">
-                Track all purchases made through your affiliate products and commission earnings
+                Track all purchases made through your affiliate products and
+                commission earnings
               </p>
             </div>
             <div className="flex items-center gap-2">
