@@ -1,6 +1,6 @@
 // services/productService.ts
 import api from './apiService';
-import { type Product, type ProductResponse, type ProductFilters, type AddProductData } from '../types/product.types';
+import { type Product, type ProductResponse, type ProductFilters, type AddMasterProductData, type AddAffiliateProductData } from '../types/product.types';
 
 class ProductService {
   // ============ PUBLIC ROUTES ============
@@ -31,25 +31,31 @@ class ProductService {
     return await api.get(`/products/search?q=${query}&page=${page}&limit=${limit}`);
   }
 
-  // ============ ADMIN: Add Admin's Own Product ============
-  async addAdminProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
-    return await api.post('/admin/products/add', data, {
+  // ============ ADMIN: Create Master Product (Draft) ============
+  async createMasterProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
+    return await api.post('/admin/products/master', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   }
 
-  // ============ ADMIN: Add Affiliate Product ============
-  async addAffiliateProduct(data: FormData): Promise<{ success: boolean; data: Product; message: string }> {
-    return await api.post('/admin/products/add-affiliate', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  // ============ ADMIN: Get All Master Products ============
+  async getMasterProducts(): Promise<{ success: boolean; data: Product[] }> {
+    return await api.get('/admin/products/master');
   }
 
-  // ✅ Update product with file upload (Admin & Affiliate)
+  // ============ AFFILIATE: Get Available Master Products ============
+  async getAvailableMasterProducts(): Promise<{ success: boolean; data: Product[] }> {
+    return await api.get('/affiliate/products/available');
+  }
+
+  // ============ AFFILIATE: Select Master Product & Add to Store ============
+  async affiliateAddProduct(data: AddAffiliateProductData): Promise<{ success: boolean; data: Product; message: string }> {
+    return await api.post('/affiliate/products/add', data);
+  }
+
+  // ============ UPDATE PRODUCT ============
   async updateProduct(id: string | number, data: FormData): Promise<{ success: boolean; data: Product }> {
     return await api.put(`/products/${id}`, data, {
       headers: {
@@ -91,7 +97,7 @@ class ProductService {
     return await api.get('/admin/products/stats');
   }
 
-  async bulkUploadProducts(products: AddProductData[]): Promise<{ success: boolean; data: any }> {
+  async bulkUploadProducts(products: AddMasterProductData[]): Promise<{ success: boolean; data: any }> {
     return await api.post('/admin/products/bulk', { products });
   }
 

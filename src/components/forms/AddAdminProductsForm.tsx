@@ -10,13 +10,12 @@ import {
   IdentificationIcon,
 } from "@heroicons/react/24/outline";
 
-interface AddAdminProductFormProps {
+interface AddMasterProductFormProps {
   onSubmit: (formData: FormData) => Promise<void>;
   loading: boolean;
   onCancel: () => void;
 }
-
-const AddAdminProductForm: React.FC<AddAdminProductFormProps> = ({
+const AddAdminProductForm: React.FC<AddMasterProductFormProps> = ({
   onSubmit,
   loading,
   onCancel,
