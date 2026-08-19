@@ -150,7 +150,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/admin/products/add"
         element={
-          <RoleRoute roles={["admin"]}>
+          <RoleRoute roles={["admin", "affiliate"]}>
             <AddProduct />
           </RoleRoute>
         }

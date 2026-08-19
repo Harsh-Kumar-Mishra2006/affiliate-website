@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
       name: "Add Product",
       path: "/admin/products/add",
       icon: PlusIcon,
-      show: isAdmin(),
+      show: isAdmin() || isAffiliate(),
     },
     {
       name: "View Purcahses",
