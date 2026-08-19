@@ -8,10 +8,11 @@ import {
   XMarkIcon,
   CloudArrowUpIcon,
   IdentificationIcon,
-  CurrencyDollarIcon,
   UserGroupIcon,
+  CheckCircleIcon,
+  UserIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/outline";
-// ✅ Import the authService to get the token
 import api from "../../services/apiService";
 import authService from "../../services/authService";
 
@@ -27,6 +28,7 @@ interface Affiliate {
   email: string;
   affiliateId: string;
   commissionRate: number;
+  isActive: boolean;
 }
 
 const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
@@ -35,8 +37,10 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
   onCancel,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
-  const [loadingAffiliates, setLoadingAffiliates] = useState(false);
+  const [affiliate, setAffiliate] = useState<Affiliate | null>(null);
+  const [loadingAffiliate, setLoadingAffiliate] = useState(false);
+  const [affiliateSearchId, setAffiliateSearchId] = useState("");
+  const [affiliateFound, setAffiliateFound] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     productId: "",
@@ -63,59 +67,104 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
   const [specKey, setSpecKey] = useState("");
   const [specValue, setSpecValue] = useState("");
 
-  // Fetch affiliates on mount
+  // ✅ Debounce affiliate search
   useEffect(() => {
-    fetchAffiliates();
-  }, []);
+    if (affiliateSearchId.trim().length > 0) {
+      const timer = setTimeout(() => {
+        fetchAffiliateById(affiliateSearchId.trim());
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setAffiliate(null);
+      setAffiliateFound(false);
+    }
+  }, [affiliateSearchId]);
 
-  const fetchAffiliates = async () => {
-    setLoadingAffiliates(true);
+  const fetchAffiliateById = async (searchValue: string) => {
+    // Check if it's a numeric ID or a string affiliateId
+    const isNumeric = /^\d+$/.test(searchValue);
+
+    setLoadingAffiliate(true);
     try {
-      // ✅ Check if user is authenticated
       if (!authService.isAuthenticated()) {
-        console.warn("User not authenticated, cannot fetch affiliates");
-        toast.error("Please login to load affiliates");
-        setLoadingAffiliates(false);
+        toast.error("Please login to search affiliates");
+        setLoadingAffiliate(false);
         return;
       }
 
-      console.log("🔍 Fetching affiliates...");
+      let response;
 
-      // ✅ Use the correct endpoint with authentication
-      const response = await api.get<{
-        success: boolean;
-        data: Affiliate[];
-      }>("/auth/affiliates");
-
-      console.log("📊 Affiliates response:", response);
-
-      if (response.success) {
-        setAffiliates(response.data || []);
-        console.log(`✅ Loaded ${response.data?.length || 0} affiliates`);
+      if (isNumeric) {
+        // Search by ID
+        response = await api.get<{
+          success: boolean;
+          data: Affiliate;
+        }>(`/auth/affiliates/${searchValue}`);
       } else {
-        console.warn("⚠️ Affiliates request returned success: false");
-        setAffiliates([]);
+        // Search by affiliateId string (like AFFHRK12345)
+        response = await api.get<{
+          success: boolean;
+          data: Affiliate[];
+        }>(`/auth/affiliates?search=${searchValue}`);
+
+        if (response.success && response.data.length > 0) {
+          // Find exact match by affiliateId
+          const found = response.data.find(
+            (a) => a.affiliateId.toLowerCase() === searchValue.toLowerCase(),
+          );
+          if (found) {
+            setAffiliate(found);
+            setAffiliateFound(true);
+            setFormData((prev) => ({
+              ...prev,
+              affiliateId: found.id.toString(),
+            }));
+            toast.success(`Affiliate found: ${found.name}`);
+            setLoadingAffiliate(false);
+            return;
+          }
+        }
+        setLoadingAffiliate(false);
+        return;
+      }
+
+      if (response.success && response.data) {
+        const foundAffiliate = response.data;
+        // ✅ Check if affiliate is active
+        if (!foundAffiliate.isActive) {
+          toast.error("This affiliate is inactive. Please contact admin.");
+          setAffiliate(null);
+          setAffiliateFound(false);
+          setLoadingAffiliate(false);
+          return;
+        }
+        setAffiliate(foundAffiliate);
+        setAffiliateFound(true);
+        setFormData((prev) => ({
+          ...prev,
+          affiliateId: foundAffiliate.id.toString(),
+        }));
+        toast.success(`Affiliate found: ${foundAffiliate.name}`);
+      } else {
+        setAffiliate(null);
+        setAffiliateFound(false);
+        toast.error("Affiliate not found");
       }
     } catch (error: any) {
-      console.error("❌ Failed to fetch affiliates:", error);
-
-      // ✅ Show more specific error message
-      if (error.response?.status === 401) {
-        toast.error("Please login to load affiliates");
+      console.error("❌ Failed to fetch affiliate:", error);
+      if (error.response?.status === 404) {
+        toast.error("Affiliate not found. Please check the ID.");
       } else if (error.response?.status === 403) {
         toast.error("You don't have permission to view affiliates");
       } else {
-        toast.error(
-          error.response?.data?.error || "Failed to load affiliates list",
-        );
+        toast.error(error.response?.data?.error || "Failed to fetch affiliate");
       }
-      setAffiliates([]);
+      setAffiliate(null);
+      setAffiliateFound(false);
     } finally {
-      setLoadingAffiliates(false);
+      setLoadingAffiliate(false);
     }
   };
-
-  // ... rest of the component remains the same ...
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -126,6 +175,19 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleAffiliateSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = e.target.value;
+    setAffiliateSearchId(value);
+    // If user clears the input, reset affiliate
+    if (!value.trim()) {
+      setAffiliate(null);
+      setAffiliateFound(false);
+      setFormData((prev) => ({ ...prev, affiliateId: "" }));
     }
   };
 
@@ -220,8 +282,10 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
     if (!formData.price) newErrors.price = "Price is required";
     if (!formData.company) newErrors.company = "Company name is required";
     if (!formData.category) newErrors.category = "Category is required";
-    if (!formData.affiliateId)
-      newErrors.affiliateId = "Please select an affiliate";
+
+    if (!affiliateFound || !affiliate) {
+      newErrors.affiliateId = "Please enter a valid affiliate ID";
+    }
     if (!formData.affiliateUrl) {
       newErrors.affiliateUrl = "Affiliate URL is required";
     } else if (!formData.affiliateUrl.startsWith("http")) {
@@ -246,6 +310,7 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
     e.preventDefault();
     if (!validateForm()) return;
 
+    // ✅ Use the affiliate ID from the found affiliate
     const formDataToSend = new FormData();
 
     const textFields = {
@@ -259,7 +324,7 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
       serviceId: formData.serviceId,
       brand: formData.brand,
       stock: formData.stock,
-      affiliateId: formData.affiliateId,
+      affiliateId: affiliate?.id.toString() || formData.affiliateId,
       affiliateUrl: formData.affiliateUrl,
       commissionRate: formData.commissionRate,
       tags: JSON.stringify(formData.tags),
@@ -281,10 +346,6 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
     await onSubmit(formDataToSend);
   };
 
-  const selectedAffiliate = affiliates.find(
-    (a) => a.id === parseInt(formData.affiliateId),
-  );
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Info Banner */}
@@ -295,78 +356,120 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
             Affiliate Product Addition
           </p>
           <p className="text-sm text-blue-600">
-            Select an affiliate who suggested this product. The admin will
-            receive the commission rate you set (10-25%) and the affiliate will
-            receive the rest.
+            Enter the affiliate ID to link this product. The affiliate will
+            receive commission on sales.
           </p>
         </div>
       </div>
 
-      {/* Affiliate Specific Fields */}
+      {/* Affiliate Search Section */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <CurrencyDollarIcon className="h-5 w-5 text-purple-600" />
+          <UserGroupIcon className="h-5 w-5 text-purple-600" />
           Affiliate Details
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Affiliate ID Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Affiliate <span className="text-red-500">*</span>
+              Enter Affiliate ID <span className="text-red-500">*</span>
             </label>
-            <select
-              name="affiliateId"
-              value={formData.affiliateId}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              disabled={loadingAffiliates}
-            >
-              <option value="">
-                {loadingAffiliates ? "Loading..." : "Select an affiliate"}
-              </option>
-              {affiliates.map((affiliate) => (
-                <option key={affiliate.id} value={affiliate.id}>
-                  {affiliate.name} ({affiliate.email}) - {affiliate.affiliateId}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <IdentificationIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={affiliateSearchId}
+                onChange={handleAffiliateSearchChange}
+                placeholder="Enter Affiliate ID (e.g., AFFHRK12345)"
+                className={`w-full pl-10 pr-12 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  affiliateFound
+                    ? "border-green-500 bg-green-50"
+                    : affiliateSearchId && !loadingAffiliate
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                }`}
+                disabled={loadingAffiliate}
+              />
+              {loadingAffiliate && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                </div>
+              )}
+              {affiliateFound && !loadingAffiliate && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Enter the affiliate's unique ID (e.g., AFFHRK12345) or numeric ID
+            </p>
             {errors.affiliateId && (
               <p className="text-red-500 text-sm mt-1">{errors.affiliateId}</p>
             )}
-            {!loadingAffiliates && affiliates.length === 0 && (
-              <p className="text-yellow-500 text-sm mt-1">
-                No affiliates found. Please create an affiliate first.
-              </p>
+          </div>
+
+          {/* Affiliate Info Card */}
+          <div>
+            {affiliateFound && affiliate ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <UserIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900">
+                        {affiliate.name}
+                      </h4>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <EnvelopeIcon className="h-3 w-3 text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        {affiliate.email}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <IdentificationIcon className="h-3 w-3 text-gray-400" />
+                      <span className="text-sm font-mono text-gray-600">
+                        ID: {affiliate.affiliateId}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      Commission Rate: {affiliate.commissionRate}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : affiliateSearchId && !loadingAffiliate ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <XMarkIcon className="h-5 w-5 text-red-500" />
+                  <div>
+                    <p className="text-sm text-red-700 font-medium">
+                      Affiliate not found
+                    </p>
+                    <p className="text-xs text-red-600">
+                      Please check the ID and try again
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm text-gray-500 text-center">
+                  Enter an affiliate ID to see details here
+                </p>
+              </div>
             )}
           </div>
 
-          {selectedAffiliate && (
-            <div className="bg-purple-50 rounded-lg p-3 flex items-center gap-3">
-              <div>
-                <p className="text-xs text-gray-500">Selected Affiliate</p>
-                <p className="text-sm font-medium text-gray-700">
-                  {selectedAffiliate.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {selectedAffiliate.affiliateId}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="md:col-span-2">
-            <Input
-              label="affiliateId"
-              type="text"
-              name="affiliateId"
-              placeholder="affiliateId"
-              value={formData.affiliateId}
-              onChange={handleChange}
-              error={errors.affiliateId}
-              required
-              helperText="affiliateId"
-            />
-          </div>
-
+          {/* Affiliate URL */}
           <div className="md:col-span-2">
             <Input
               label="Affiliate URL"
@@ -381,6 +484,7 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
             />
           </div>
 
+          {/* Commission Rate */}
           <div>
             <Input
               label="Commission Rate (%)"
@@ -713,7 +817,12 @@ const AddAffiliateProductForm: React.FC<AddAffiliateProductFormProps> = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" isLoading={loading}>
+        <Button
+          type="submit"
+          variant="primary"
+          isLoading={loading}
+          disabled={!affiliateFound}
+        >
           {loading ? "Uploading..." : "Add Affiliate Product"}
         </Button>
       </div>
