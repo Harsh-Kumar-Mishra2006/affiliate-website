@@ -424,7 +424,7 @@ const Products: React.FC = () => {
                   {/* Price */}
                   <div className="mt-3 flex items-center space-x-2">
                     <span className="text-xl font-bold text-gray-900">
-                      {formatPrice(product.price)}
+                      {formatPrice(Number(product.price))}
                     </span>
                   </div>
 

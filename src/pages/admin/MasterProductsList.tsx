@@ -4,10 +4,7 @@ import { type Product } from "../../types/product.types";
 import productService from "../../services/productService";
 import Button from "../../components/common/Button";
 import toast from "react-hot-toast";
-import {
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 interface MasterProductsListProps {
   onAddNew: () => void;
@@ -144,7 +141,7 @@ const MasterProductsList: React.FC<MasterProductsListProps> = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-900 font-medium">
-                      ₹{product.price.toFixed(2)}
+                      ₹{Number(product.price).toFixed(2)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
