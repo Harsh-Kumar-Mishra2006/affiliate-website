@@ -4,6 +4,7 @@ import { type Product, type ProductResponse, type ProductFilters, type AddMaster
 
 class ProductService {
   // ============ PUBLIC ROUTES ============
+
   
   async getProducts(filters: ProductFilters = {}): Promise<ProductResponse> {
     const params = new URLSearchParams();
@@ -51,7 +52,11 @@ class ProductService {
   }
 
   // ============ AFFILIATE: Select Master Product & Add to Store ============
-  async affiliateAddProduct(data: AddAffiliateProductData): Promise<{ success: boolean; data: Product; message: string }> {
+  async affiliateAddProduct(data: AddAffiliateProductData): Promise<{ 
+    success: boolean; 
+    data: Product; 
+    message: string 
+  }> {
     return await api.post('/affiliate/products/add', data);
   }
 
