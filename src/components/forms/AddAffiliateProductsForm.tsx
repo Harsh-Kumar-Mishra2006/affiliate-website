@@ -2,14 +2,14 @@
 import React, { useState } from "react";
 import Button from "../common/Button";
 import { type Product } from "../../types/product.types";
-import { XMarkIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, IdentificationIcon } from "@heroicons/react/24/outline";
 import { Percent } from "lucide-react";
 
 interface AffiliateProductAddFormProps {
   selectedProduct: Product | null;
   onSubmit: (data: {
     masterProductId: number;
-    affiliateUrl: string;
+    affiliateId: string; // ✅ Changed from affiliateUrl to affiliateId
     commissionRate: number;
   }) => Promise<void>;
   loading: boolean;
@@ -23,7 +23,7 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
-    affiliateUrl: "",
+    affiliateId: "", // ✅ Changed from affiliateUrl
     commissionRate: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,14 +39,10 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.affiliateUrl) {
-      newErrors.affiliateUrl = "Affiliate URL is required";
-    } else if (
-      !formData.affiliateUrl.startsWith("http://") &&
-      !formData.affiliateUrl.startsWith("https://")
-    ) {
-      newErrors.affiliateUrl =
-        "Please enter a valid URL starting with http:// or https://";
+    if (!formData.affiliateId) {
+      newErrors.affiliateId = "Affiliate ID is required";
+    } else if (formData.affiliateId.trim().length < 3) {
+      newErrors.affiliateId = "Affiliate ID must be at least 3 characters";
     }
 
     if (!formData.commissionRate) {
@@ -69,7 +65,7 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
 
     await onSubmit({
       masterProductId: selectedProduct.id,
-      affiliateUrl: formData.affiliateUrl,
+      affiliateId: formData.affiliateId.trim(), // ✅ Send affiliateId
       commissionRate: parseFloat(formData.commissionRate),
     });
   };
@@ -109,7 +105,7 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
             </h3>
             <p className="text-sm text-gray-600">{selectedProduct.company}</p>
             <p className="text-sm font-medium text-emerald-600 mt-1">
-              ₹{selectedProduct.price.toFixed(2)}
+              ₹{Number(selectedProduct.price).toFixed(2)}
             </p>
           </div>
           <button
@@ -122,31 +118,31 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
         </div>
       </div>
 
-      {/* Affiliate URL */}
+      {/* ✅ Affiliate ID - New field */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Affiliate URL <span className="text-red-500">*</span>
+          Affiliate ID <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <LinkIcon className="h-5 w-5 text-gray-400" />
+            <IdentificationIcon className="h-5 w-5 text-gray-400" />
           </div>
           <input
             type="text"
-            name="affiliateUrl"
-            placeholder="https://example.com/ref/your-id"
-            value={formData.affiliateUrl}
+            name="affiliateId"
+            placeholder="Enter your affiliate ID (e.g., AFF12345)"
+            value={formData.affiliateId}
             onChange={handleChange}
             className={`w-full pl-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-              errors.affiliateUrl ? "border-red-500" : "border-gray-300"
+              errors.affiliateId ? "border-red-500" : "border-gray-300"
             }`}
           />
         </div>
-        {errors.affiliateUrl && (
-          <p className="text-red-500 text-sm mt-1">{errors.affiliateUrl}</p>
+        {errors.affiliateId && (
+          <p className="text-red-500 text-sm mt-1">{errors.affiliateId}</p>
         )}
         <p className="text-xs text-gray-400 mt-1">
-          Your referral link where customers will be redirected
+          Your unique affiliate identifier provided by the admin
         </p>
       </div>
 
@@ -176,20 +172,19 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
         {errors.commissionRate && (
           <p className="text-red-500 text-sm mt-1">{errors.commissionRate}</p>
         )}
-        <div className="mt-2 text-xs text-gray-500">
-          <p>
-            You will earn:{" "}
-            <span className="font-medium text-green-600">
+        <div className="mt-2 grid grid-cols-2 gap-4 text-xs">
+          <div className="bg-gray-50 p-2 rounded">
+            <span className="text-gray-500">Your Earnings:</span>
+            <span className="font-medium text-green-600 block">
               {100 - parseFloat(formData.commissionRate || "0")}%
-            </span>{" "}
-            of each sale
-          </p>
-          <p>
-            Admin commission:{" "}
-            <span className="font-medium text-purple-600">
+            </span>
+          </div>
+          <div className="bg-gray-50 p-2 rounded">
+            <span className="text-gray-500">Admin Commission:</span>
+            <span className="font-medium text-purple-600 block">
               {parseFloat(formData.commissionRate || "0")}%
             </span>
-          </p>
+          </div>
         </div>
       </div>
 

@@ -1,22 +1,22 @@
-// components/forms/AffiliateProductSelectForm.tsx
+// AffiliateProductSelectForm.tsx - Full component with better UX
+
 import React, { useState, useEffect } from "react";
 import Button from "../common/Button";
 import toast from "react-hot-toast";
 import productService from "../../services/productService";
 import { type Product } from "../../types/product.types";
 import {
-  LinkIcon,
+  IdentificationIcon,
   CheckCircleIcon,
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-
 import { Percent } from "lucide-react";
 
 interface AffiliateProductSelectFormProps {
   onSubmit: (data: {
     masterProductId: number;
-    affiliateUrl: string;
+    affiliateId: string;
     commissionRate: number;
   }) => Promise<void>;
   loading: boolean;
@@ -32,7 +32,7 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [formData, setFormData] = useState({
-    affiliateUrl: "",
+    affiliateId: "",
     commissionRate: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -59,7 +59,6 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
-    // Clear previous errors
     setErrors({});
   };
 
@@ -78,14 +77,10 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
       newErrors.product = "Please select a product";
     }
 
-    if (!formData.affiliateUrl) {
-      newErrors.affiliateUrl = "Affiliate URL is required";
-    } else if (
-      !formData.affiliateUrl.startsWith("http://") &&
-      !formData.affiliateUrl.startsWith("https://")
-    ) {
-      newErrors.affiliateUrl =
-        "Please enter a valid URL starting with http:// or https://";
+    if (!formData.affiliateId) {
+      newErrors.affiliateId = "Affiliate ID is required";
+    } else if (formData.affiliateId.trim().length < 3) {
+      newErrors.affiliateId = "Affiliate ID must be at least 3 characters";
     }
 
     if (!formData.commissionRate) {
@@ -104,11 +99,11 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm() || !selectedProduct) return;
+    if (!validateForm()) return;
 
     await onSubmit({
-      masterProductId: selectedProduct.id,
-      affiliateUrl: formData.affiliateUrl,
+      masterProductId: selectedProduct!.id,
+      affiliateId: formData.affiliateId.trim(),
       commissionRate: parseFloat(formData.commissionRate),
     });
   };
@@ -127,6 +122,13 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
       </div>
     );
   }
+
+  const isFormValid =
+    selectedProduct &&
+    formData.affiliateId.trim().length >= 3 &&
+    formData.commissionRate &&
+    parseFloat(formData.commissionRate) >= 10 &&
+    parseFloat(formData.commissionRate) <= 25;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -163,7 +165,7 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
                 key={product.id}
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                   selectedProduct?.id === product.id
-                    ? "border-purple-500 bg-purple-50"
+                    ? "border-purple-500 bg-purple-50 shadow-md"
                     : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
                 }`}
                 onClick={() => handleSelectProduct(product)}
@@ -188,7 +190,7 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
                       {product.company}
                     </p>
                     <p className="text-sm font-semibold text-emerald-600">
-                      ₹{product.price.toFixed(2)}
+                      ₹{Number(product.price).toFixed(2)}
                     </p>
                     {selectedProduct?.id === product.id && (
                       <CheckCircleIcon className="h-5 w-5 text-purple-500 mt-1" />
@@ -204,20 +206,20 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
         )}
       </div>
 
-      {/* Selected Product Summary */}
-      {selectedProduct && (
+      {/* Selected Product Summary - Shows when product is selected */}
+      {selectedProduct ? (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <p className="text-sm text-green-700 font-medium">
-                Selected Product
+                ✅ Product Selected
               </p>
               <h4 className="font-semibold text-gray-900">
                 {selectedProduct.name}
               </h4>
               <p className="text-sm text-gray-600">{selectedProduct.company}</p>
               <p className="text-sm font-medium text-emerald-600 mt-1">
-                ₹{selectedProduct.price.toFixed(2)}
+                ₹{Number(selectedProduct.price).toFixed(2)}
               </p>
             </div>
             <button
@@ -229,33 +231,39 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
             </button>
           </div>
         </div>
+      ) : (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+          <p className="text-yellow-700 text-sm">
+            👆 Please select a product from the list above to continue
+          </p>
+        </div>
       )}
 
-      {/* Affiliate URL */}
+      {/* Affiliate ID */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Affiliate URL <span className="text-red-500">*</span>
+          Affiliate ID <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <LinkIcon className="h-5 w-5 text-gray-400" />
+            <IdentificationIcon className="h-5 w-5 text-gray-400" />
           </div>
           <input
             type="text"
-            name="affiliateUrl"
-            placeholder="https://example.com/ref/your-id"
-            value={formData.affiliateUrl}
+            name="affiliateId"
+            placeholder="Enter your affiliate ID (e.g., AFF12345)"
+            value={formData.affiliateId}
             onChange={handleChange}
             className={`w-full pl-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-              errors.affiliateUrl ? "border-red-500" : "border-gray-300"
+              errors.affiliateId ? "border-red-500" : "border-gray-300"
             }`}
           />
         </div>
-        {errors.affiliateUrl && (
-          <p className="text-red-500 text-sm mt-1">{errors.affiliateUrl}</p>
+        {errors.affiliateId && (
+          <p className="text-red-500 text-sm mt-1">{errors.affiliateId}</p>
         )}
         <p className="text-xs text-gray-400 mt-1">
-          Your referral link where customers will be redirected
+          Your unique affiliate identifier provided by the admin
         </p>
       </div>
 
@@ -301,7 +309,7 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
         </div>
       </div>
 
-      {/* Submit */}
+      {/* Submit - Button is enabled when form is valid */}
       <div className="flex justify-end space-x-3 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
@@ -310,10 +318,21 @@ const AffiliateProductSelectForm: React.FC<AffiliateProductSelectFormProps> = ({
           type="submit"
           variant="primary"
           isLoading={loading}
-          disabled={!selectedProduct}
+          disabled={!isFormValid} // ✅ Better validation
         >
           {loading ? "Adding..." : "Add Product to Store"}
         </Button>
+      </div>
+
+      {/* Show validation status */}
+      <div className="text-xs text-gray-400 text-right">
+        {!selectedProduct && "⚠️ Select a product"}
+        {selectedProduct && !formData.affiliateId && " ⚠️ Enter affiliate ID"}
+        {selectedProduct &&
+          formData.affiliateId &&
+          !formData.commissionRate &&
+          " ⚠️ Enter commission rate"}
+        {isFormValid && " ✅ Ready to submit"}
       </div>
     </form>
   );

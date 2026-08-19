@@ -63,7 +63,7 @@ const AddProduct: React.FC = () => {
   // ✅ This now correctly matches the AddAffiliateProductData type
   const handleAffiliateAddProduct = async (data: {
     masterProductId: number;
-    affiliateUrl: string;
+    affiliateId: string;
     commissionRate: number;
   }) => {
     setAffiliateLoading(true);

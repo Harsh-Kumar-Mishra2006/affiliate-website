@@ -6,7 +6,7 @@ export interface Product {
   slug: string;
   description: string;
   shortDescription?: string;
-  price: number;
+  price: number | string;
   serviceId?: string;
   company: string;
   categoryId: number;
@@ -75,7 +75,7 @@ export interface AddMasterProductData {
 // The backend will use masterProductId to fetch the product data
 export interface AddAffiliateProductData {
   masterProductId: number;   // ID of the master product to select
-  affiliateUrl: string;       // Affiliate's referral URL
+  affiliateId: string;    // Affiliate's referral URL
   commissionRate: number;     // Commission rate (10-25%)
 }
 
