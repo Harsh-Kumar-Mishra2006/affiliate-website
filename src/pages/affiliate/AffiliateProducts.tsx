@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import {
   ShoppingBagIcon,
   PlusIcon,
-  EyeIcon,
   CurrencyRupeeIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -247,21 +246,11 @@ const AffiliateProducts: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-green-600">
-                        ₹{product.totalCommissionEarned?.toFixed(2) || "0.00"}
+                        ₹{Number(product.totalCommissionEarned || 0).toFixed(2)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(product)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Link to={`/products/${product.id}`}>
-                        <button
-                          className="text-blue-600 hover:text-blue-900 mr-3"
-                          title="View Product"
-                        >
-                          <EyeIcon className="h-5 w-5" />
-                        </button>
-                      </Link>
                     </td>
                   </tr>
                 ))}
