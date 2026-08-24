@@ -8,12 +8,13 @@ import toast from "react-hot-toast";
 import {
   UserIcon,
   ShoppingBagIcon,
-  // CreditCardIcon,
   ClockIcon,
   CheckCircleIcon,
   UsersIcon,
   CurrencyDollarIcon,
   LinkIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard: React.FC = () => {
@@ -25,13 +26,19 @@ const Dashboard: React.FC = () => {
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [itemsPerPage] = useState(10);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
     fetchDashboardData();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentPage]);
 
   const fetchDashboardData = async () => {
     try {
@@ -45,14 +52,17 @@ const Dashboard: React.FC = () => {
 
       // Fetch role-specific data
       if (user?.role === "admin") {
-        // Admin: Fetch all users and affiliate details
+        // Admin: Fetch all users with pagination
         const usersResponse = await authService.getAllUsers({
-          page: 1,
-          limit: 10,
+          page: currentPage,
+          limit: itemsPerPage,
         });
+
         if (usersResponse.success) {
           setDashboardStats(usersResponse.data.summary);
-          setRecentActivity(usersResponse.data.users.slice(0, 5));
+          setRecentActivity(usersResponse.data.users);
+          setTotalPages(usersResponse.data.pagination?.totalPages || 1);
+          setTotalUsers(usersResponse.data.pagination?.total || 0);
         }
 
         // Fetch affiliate details for stats
@@ -66,13 +76,9 @@ const Dashboard: React.FC = () => {
         if (affiliateDetails.success) {
           setAffiliateData(affiliateDetails.data);
         }
-
-        // Fetch recent purchases/commissions
-        // This would be a separate API call
         setRecentActivity([]);
       } else {
         // Regular user: Fetch purchase history
-        // This would be a separate API call
         setRecentActivity([]);
       }
     } catch (error: any) {
@@ -82,6 +88,25 @@ const Dashboard: React.FC = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
@@ -156,11 +181,19 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Users Table - Updated with all columns */}
+        {/* Recent Users Table with Pagination */}
         <div className="bg-white rounded-xl shadow-sm p-5">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Users
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Users
+            </h3>
+            <span className="text-sm text-gray-500">
+              Showing {(currentPage - 1) * itemsPerPage + 1}-
+              {Math.min(currentPage * itemsPerPage, totalUsers)} of {totalUsers}{" "}
+              users
+            </span>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -180,9 +213,6 @@ const Dashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Service ID
                   </th>
-                  {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Password
-                  </th> */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Status
                   </th>
@@ -192,109 +222,161 @@ const Dashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {recentActivity.map((user: any) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    {/* User Name */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <span className="text-purple-600 font-medium text-sm">
-                            {user.name?.charAt(0).toUpperCase()}
-                          </span>
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((user: any) => (
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      {/* User Name */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 font-medium text-sm">
+                              {user.name?.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-900">
+                              {user.name}
+                            </p>
+                          </div>
                         </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">
-                            {user.name}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Username */}
-                    <td className="px-4 py-3">
-                      <p className="text-sm text-gray-900 font-mono">
-                        {user.username || "—"}
-                      </p>
-                    </td>
+                      {/* Username */}
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-900 font-mono">
+                          {user.username || "—"}
+                        </p>
+                      </td>
 
-                    {/* Email */}
-                    <td className="px-4 py-3">
-                      <p className="text-sm text-gray-900">{user.email}</p>
-                    </td>
+                      {/* Email */}
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-900">{user.email}</p>
+                      </td>
 
-                    {/* Role */}
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                      ${
-                        user.role === "admin"
-                          ? "bg-purple-100 text-purple-700"
-                          : user.role === "affiliate"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-700"
-                      }`}
-                      >
-                        {user.role?.charAt(0).toUpperCase() +
-                          user.role?.slice(1)}
-                      </span>
-                    </td>
-
-                    {/* Service ID (Affiliate ID) */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm font-mono">
-                        {user.role === "affiliate" ? (
-                          <span className="bg-purple-50 px-2 py-1 rounded text-purple-700">
-                            {user.affiliateId || "—"}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </span>
-                    </td>
-
-                    {/* Password
-                    <td className="px-4 py-3">
-                      {user.needsPasswordChange && user.tempPassword ? (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-mono bg-yellow-50 px-2 py-1 rounded text-yellow-700">
-                            {user.tempPassword}
-                          </span>
-                          <span className="text-xs text-yellow-500">
-                            (temp)
-                          </span>
-                        </div>
-                      ) : user.tempPassword ? (
-                        <span className="text-xs font-mono bg-green-50 px-2 py-1 rounded text-green-700">
-                          {user.tempPassword}
+                      {/* Role */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                          ${
+                            user.role === "admin"
+                              ? "bg-purple-100 text-purple-700"
+                              : user.role === "affiliate"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {user.role?.charAt(0).toUpperCase() +
+                            user.role?.slice(1)}
                         </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">
-                          {user.tempPassword}
+                      </td>
+
+                      {/* Service ID (Affiliate ID) */}
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-mono">
+                          {user.role === "affiliate" ? (
+                            <span className="bg-purple-50 px-2 py-1 rounded text-purple-700">
+                              {user.affiliateId || "—"}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
                         </span>
-                      )}
-                    </td> */}
+                      </td>
 
-                    {/* Status */}
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                      ${user.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                      >
-                        {user.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                          ${user.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                        >
+                          {user.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
 
-                    {/* Joined Date */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-gray-600">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </span>
+                      {/* Joined Date */}
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-600">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
+                      No users found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg border ${
+                    currentPage === 1
+                      ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-1 rounded-lg text-sm ${
+                          currentPage === pageNum
+                            ? "bg-purple-600 text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg border ${
+                    currentPage === totalPages
+                      ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ChevronRightIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="text-sm text-gray-500">
+                Page {currentPage} of {totalPages}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
