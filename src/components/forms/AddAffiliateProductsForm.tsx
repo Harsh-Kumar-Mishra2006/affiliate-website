@@ -174,13 +174,13 @@ const AffiliateProductAddForm: React.FC<AffiliateProductAddFormProps> = ({
         )}
         <div className="mt-2 grid grid-cols-2 gap-4 text-xs">
           <div className="bg-gray-50 p-2 rounded">
-            <span className="text-gray-500">Your Earnings:</span>
+            <span className="text-gray-500">Admin Earnings:</span>
             <span className="font-medium text-green-600 block">
               {100 - parseFloat(formData.commissionRate || "0")}%
             </span>
           </div>
           <div className="bg-gray-50 p-2 rounded">
-            <span className="text-gray-500">Admin Commission:</span>
+            <span className="text-gray-500">Your Commission:</span>
             <span className="font-medium text-purple-600 block">
               {parseFloat(formData.commissionRate || "0")}%
             </span>
